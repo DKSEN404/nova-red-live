@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] — 2026-06-03
+
+### Fixed
+- **`scripts/ChannelManager.mjs`**: `_findOrCreatePlaylist()` now validates existing playlists found in world data. If a playlist from v1.0.0 has invalid methods (corrupted by `mode: 3`), it is deleted and recreated. Added `typeof` guard in `play()`, `stop()`, and `next()` to prevent `playlist.play is not a function` errors. (B5 — CRITICAL)
+- **`scripts/YouTubeImporter.mjs`**: Changed `api.allorigins.win` proxy from `/raw` (no CORS) to `/get` endpoint (has CORS headers). Added `cors.sh` and `codetabs` as additional proxy fallbacks. Added JSON wrapper parsing for allorigins `/get` response format. (B3 — CRITICAL)
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` now rejects non-YouTube URLs early with a clear message ("Only YouTube URLs or search terms are supported"), preventing failed imports for Spotify/other URLs.
+
+### Changed
+- `module.json`: version → `1.0.2`, removed dead Piped instances `r4fo.com` and `ngn.tf` (DNS errors confirmed), added `pipedapi.silentx.me` and `pipedapi.qdi.ax` as replacements
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.1] — 2026-06-03
 
 ### Fixed
@@ -135,6 +148,19 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.2] — 2026-06-03
+
+### Corregido
+- **`scripts/ChannelManager.mjs`**: `_findOrCreatePlaylist()` ahora valida las playlists existentes encontradas en la base de datos del mundo. Si una playlist de v1.0.0 tiene métodos inválidos (corrupta por `mode: 3`), se elimina y recrea. Agregada guardia `typeof` en `play()`, `stop()` y `next()` para prevenir errores `playlist.play is not a function`. (B5 — CRÍTICO)
+- **`scripts/YouTubeImporter.mjs`**: Cambiado proxy de `api.allorigins.win` de `/raw` (sin CORS) al endpoint `/get` (con cabeceras CORS). Agregados `cors.sh` y `codetabs` como proxies fallback adicionales. Agregado parseo del wrapper JSON para el formato de respuesta de `/get`. (B3 — CRÍTICO)
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` ahora rechaza URLs no-YouTube temprano con un mensaje claro ("Solo se aceptan URLs de YouTube o términos de búsqueda"), previniendo imports fallidos para URLs de Spotify y otros.
+
+### Cambiado
+- `module.json`: versión → `1.0.2`, instancias Piped caídas `r4fo.com` y `ngn.tf` eliminadas, agregadas `pipedapi.silentx.me` y `pipedapi.qdi.ax`
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.1] — 2026-06-03
 

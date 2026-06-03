@@ -27,6 +27,16 @@ export class ChannelManager {
   async _findOrCreatePlaylist(channelId) {
     const name = this._playlistName(channelId);
     let playlist = game.playlists.find(p => p.name.startsWith(PLAYLIST_PREFIX) && p.flags?.[MODULE_ID]?.channel === channelId);
+    if (playlist) {
+      if (typeof playlist.play !== 'function' || typeof playlist.stop !== 'function') {
+        try {
+          await playlist.delete();
+        } catch (e) {
+          console.error(`${MODULE_ID} | Failed to delete corrupt playlist for ${channelId}:`, e);
+        }
+        playlist = null;
+      }
+    }
     if (!playlist) {
       try {
         playlist = await Playlist.create({
@@ -75,7 +85,7 @@ export class ChannelManager {
 
   async play(channelId) {
     const playlist = this.playlists[channelId];
-    if (!playlist) return;
+    if (!playlist || typeof playlist.play !== 'function') return;
     if (game.user.isGM) {
       if (this.playing[channelId]) return;
       this.playing[channelId] = true;
@@ -86,7 +96,7 @@ export class ChannelManager {
 
   async stop(channelId) {
     const playlist = this.playlists[channelId];
-    if (!playlist) return;
+    if (!playlist || typeof playlist.stop !== 'function') return;
     if (game.user.isGM) {
       this.playing[channelId] = false;
       await playlist.stop();
@@ -95,7 +105,7 @@ export class ChannelManager {
 
   async next(channelId) {
     const playlist = this.playlists[channelId];
-    if (!playlist) return;
+    if (!playlist || typeof playlist.play !== 'function' || typeof playlist.stop !== 'function') return;
     if (this.playing[channelId]) {
       await playlist.stop();
       await playlist.play();

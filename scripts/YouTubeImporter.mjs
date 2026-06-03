@@ -1,8 +1,10 @@
 import { PIPED_INSTANCES, MODULE_ID } from './constants.mjs';
 
 const CORS_PROXIES = [
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?'
+  { url: 'https://api.allorigins.win/get?url=', type: 'allorigins' },
+  { url: 'https://corsproxy.io/?', type: 'passthrough' },
+  { url: 'https://api.codetabs.com/v1/proxy?quest=', type: 'passthrough' },
+  { url: 'https://proxy.cors.sh/', type: 'passthrough' }
 ];
 
 export class YouTubeImporter {
@@ -20,10 +22,19 @@ export class YouTubeImporter {
     for (const proxy of CORS_PROXIES) {
       for (const instance of PIPED_INSTANCES) {
         try {
-          const url = `${proxy}${encodeURIComponent(`${instance}${endpoint}`)}`;
-          const res = await fetch(url);
+          const targetUrl = `${instance}${endpoint}`;
+          const proxyUrl = `${proxy.url}${encodeURIComponent(targetUrl)}`;
+          const res = await fetch(proxyUrl);
           if (!res.ok) continue;
-          return await res.json();
+          let data;
+          if (proxy.type === 'allorigins') {
+            const wrapper = await res.json();
+            if (!wrapper?.contents) continue;
+            data = JSON.parse(wrapper.contents);
+          } else {
+            data = await res.json();
+          }
+          return data;
         } catch (e) {
           continue;
         }

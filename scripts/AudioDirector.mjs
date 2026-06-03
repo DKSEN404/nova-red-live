@@ -148,6 +148,11 @@ export class AudioDirector extends Application {
 
   async _handleImport(val, channelId) {
     if (!val) return;
+    const isUrl = /^(https?:\/\/)/i.test(val);
+    if (isUrl && !/(youtube\.com|youtu\.be)/i.test(val)) {
+      ui.notifications.warn('Only YouTube URLs or search terms are supported');
+      return;
+    }
     const result = await YouTubeImporter.importFromUrl(val);
     if (!result) {
       ui.notifications.warn(game.i18n.localize('nova-red-live.import.notFound') || 'Could not find anything for that URL/query');
