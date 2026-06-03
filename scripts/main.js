@@ -90,6 +90,42 @@ class NovaRedLiveApp extends Application {
 
     activateListeners(html) {
         super.activateListeners(html);
+
+        const ACTION_HANDLERS = {
+            togglePlayback: this._onTogglePlayback.bind(this),
+            toggleLoop: this._onToggleLoop.bind(this),
+            toggleShuffle: this._onToggleShuffle.bind(this),
+            toggleInputMode: this._onToggleInputMode.bind(this),
+            executeSmartInput: this._onExecuteSmartInput.bind(this),
+            toggleQueue: this._onToggleQueue.bind(this),
+            clearQueue: this._onClearQueue.bind(this),
+            playNext: this._onPlayNextAction.bind(this),
+            playPrev: this._onPlayPrevAction.bind(this),
+            closeSearch: this._onCloseSearch.bind(this),
+            savePreset: this._onSavePreset.bind(this),
+            loadPreset: this._onLoadPreset.bind(this),
+            deletePreset: this._onDeletePreset.bind(this),
+            importFromClipboard: this._onImportFromClipboard.bind(this),
+            switchTab: this._onSwitchTab.bind(this),
+            manualSync: this._onManualSync.bind(this),
+            toggleMute: this._onToggleMute.bind(this),
+            minimize: this.minimize.bind(this)
+        };
+
+        html[0].addEventListener('click', (event) => {
+            const target = event.target.closest('[data-action]');
+            if (!target) return;
+            const action = target.dataset.action;
+            const handler = ACTION_HANDLERS[action];
+            if (handler) {
+                event.preventDefault();
+                console.log('NovaRedLiveApp | data-action="' + action + '"');
+                handler(event, target);
+            } else {
+                console.warn('NovaRedLiveApp | No handler for data-action="' + action + '"');
+            }
+        });
+
         try {
             const appHeader = this.element[0].closest('.window-app')?.querySelector('.window-header');
             if (appHeader) {
@@ -193,7 +229,7 @@ class NovaRedLiveApp extends Application {
                             const loopBtn = container.querySelector('[data-action="toggleLoop"]');
                             if (loopBtn) loopBtn.style.display = 'none';
                             const shuffleBtn = container.querySelector('[data-action="toggleShuffle"]')
-                            if (shuffleBtn) shuffleBtn.display = 'none';
+                            if (shuffleBtn) shuffleBtn.style.display = 'none';
                             const nextBtn = container.querySelector('[data-action="playNext"]');
 
                             if (prevBtn) prevBtn.style.display = 'none';
@@ -226,7 +262,7 @@ class NovaRedLiveApp extends Application {
             const enabled = game.settings.get(MODULE_ID, 'enableTransparency');
             const op = enabled ? game.settings.get(MODULE_ID, 'minimizedOpacity') / 100 : 1;
             this.element[0].style.setProperty('--minimized-opacity', op);
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error('NovaRedLiveApp | Error in activateListeners:', err); }
     }
 
     async playVideoNow(tab, videoData) {
@@ -788,7 +824,7 @@ Hooks.once('ready', () => {
     if (m) m.api = { open: () => tubeApp.render(true) };
 
     setTimeout(async () => {
-        await tubeApp.render(true);
+        await tubeApp.render(true).catch(err => console.error('NovaRedLiveApp | Error on initial render:', err));
         if (game.settings.get(MODULE_ID, 'hideOnStartup') && tubeApp.element[0]) tubeApp.element[0].style.display = 'none';
     }, 1000);
 
