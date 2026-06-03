@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.2] — 2026-06-03
+
+### Changed
+- `module.json`: compatibility → minimum `12`, verified `12.331`; version → `0.0.2`
+- `scripts/main.js`: migrated from Foundry VTT v13 (`ApplicationV2` / `HandlebarsApplicationMixin`) to v12 (`Application`):
+  - `static DEFAULT_OPTIONS` → `static get defaultOptions()` with `foundry.utils.mergeObject`
+  - `static PARTS` removed; `template` string in `defaultOptions`
+  - `_prepareContext(options)` → synchronous `getData()`
+  - `_onRender(context, options)` → `activateListeners(html)` with `super.activateListeners(html)`
+  - `render({ force: true })` → `render(true)` (×3)
+  - `this.element.querySelector()` → `this.element[0].querySelector()` (×22)
+  - `this.element.closest()` → `this.element[0].closest()`
+  - `this.element.style` → `this.element[0].style` (×5)
+  - `this.element.classList` → `this.element[0].classList` (×2)
+  - `this.element.offsetWidth` / `.offsetHeight` → `this.element[0].offsetWidth` / `.offsetHeight`
+  - `if (this.element)` → `if (this.element[0])`
+  - `tubeApp.element` → `tubeApp.element[0]` (×4)
+  - `app.element` → `app.element[0]` (×5)
+
+### Fixed
+- `syncShuffle` handler used `p.isLooping` instead of `p.isShuffling` (pre-existing)
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [0.0.1] — 2026-06-03
 
 ### Added
@@ -24,6 +49,31 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [0.0.2] — 2026-06-03
+
+### Cambiado
+- `module.json`: compatibilidad → mínimo `12`, verificado `12.331`; versión → `0.0.2`
+- `scripts/main.js`: migrado de API v13 (`ApplicationV2` / `HandlebarsApplicationMixin`) a v12 (`Application`):
+  - `static DEFAULT_OPTIONS` → `static get defaultOptions()` con `foundry.utils.mergeObject`
+  - `static PARTS` eliminado; `template` string en `defaultOptions`
+  - `_prepareContext(options)` → `getData()` síncrono
+  - `_onRender(context, options)` → `activateListeners(html)` con `super.activateListeners(html)`
+  - `render({ force: true })` → `render(true)` (×3)
+  - `this.element.querySelector()` → `this.element[0].querySelector()` (×22)
+  - `this.element.closest()` → `this.element[0].closest()`
+  - `this.element.style` → `this.element[0].style` (×5)
+  - `this.element.classList` → `this.element[0].classList` (×2)
+  - `this.element.offsetWidth` / `.offsetHeight` → `this.element[0].offsetWidth` / `.offsetHeight`
+  - `if (this.element)` → `if (this.element[0])`
+  - `tubeApp.element` → `tubeApp.element[0]` (×4)
+  - `app.element` → `app.element[0]` (×5)
+
+### Corregido
+- Manejador `syncShuffle` usaba `p.isLooping` en vez de `p.isShuffling` (preexistente)
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [0.0.1] — 2026-06-03
 

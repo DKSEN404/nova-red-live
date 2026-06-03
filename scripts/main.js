@@ -1,14 +1,12 @@
 const MODULE_ID = 'foundry-tube';
 const SOCKET_NAME = `module.${MODULE_ID}`;
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
-
 const PROXIES = [
     (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
     (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
     (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
 ];
 
-class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
+class FoundryTubeApp extends Application {
     constructor() {
         super();
         window.tubeApp = this;
@@ -27,44 +25,32 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         this.preMuteVolume = 50;
     }
 
-    static DEFAULT_OPTIONS = {
-        id: "foundry-tube-app", tag: "div",
-        window: { title: "Tube", icon: "fas fa-tv", resizable: true, minimizable: true, controls: [] },
-        position: { width: 580, height: 360, top: 100, left: 115 },
-        actions: {
-            togglePlayback: FoundryTubeApp.prototype._onTogglePlayback,
-            toggleLoop: FoundryTubeApp.prototype._onToggleLoop,
-            toggleShuffle: FoundryTubeApp.prototype._onToggleShuffle,
-            toggleInputMode: FoundryTubeApp.prototype._onToggleInputMode,
-            executeSmartInput: FoundryTubeApp.prototype._onExecuteSmartInput,
-            toggleQueue: FoundryTubeApp.prototype._onToggleQueue,
-            clearQueue: FoundryTubeApp.prototype._onClearQueue,
-            playNext: FoundryTubeApp.prototype._onPlayNextAction,
-            playPrev: FoundryTubeApp.prototype._onPlayPrevAction,
-            closeSearch: FoundryTubeApp.prototype._onCloseSearch,
-            savePreset: FoundryTubeApp.prototype._onSavePreset,
-            loadPreset: FoundryTubeApp.prototype._onLoadPreset,
-            deletePreset: FoundryTubeApp.prototype._onDeletePreset,
-            importFromClipboard: FoundryTubeApp.prototype._onImportFromClipboard,
-            switchTab: FoundryTubeApp.prototype._onSwitchTab,
-                manualSync: FoundryTubeApp.prototype._onManualSync,
-                toggleMute: FoundryTubeApp.prototype._onToggleMute
-        }
-    };
-
-    static PARTS = { main: { template: `modules/${MODULE_ID}/templates/widget.hbs` } };
+    static get defaultOptions() {
+        return foundry.utils.mergeObject(super.defaultOptions, {
+            id: "foundry-tube-app",
+            title: "Tube",
+            template: `modules/${MODULE_ID}/templates/widget.hbs`,
+            width: 580,
+            height: 360,
+            top: 100,
+            left: 115,
+            resizable: true,
+            icon: "fas fa-tv",
+            classes: ["foundry-tube-app"]
+        });
+    }
 
     async minimize() {
         this.isCustomMinimized = !this.isCustomMinimized;
         if (this.isCustomMinimized) {
-            if (this.element) {
-                this.savedWidth = this.element.offsetWidth;
-                if (this.element.offsetHeight > 100) this.savedHeight = this.element.offsetHeight;
+            if (this.element[0]) {
+                this.savedWidth = this.element[0].offsetWidth;
+                if (this.element[0].offsetHeight > 100) this.savedHeight = this.element[0].offsetHeight;
             }
-            this.element.classList.add('custom-minimized');
+            this.element[0].classList.add('custom-minimized');
             return this.setPosition({ height: 58, width: this.savedWidth });
         } else {
-            this.element.classList.remove('custom-minimized');
+            this.element[0].classList.remove('custom-minimized');
             const w = this.savedWidth || 580;
             const h = (this.savedHeight && this.savedHeight > 100) ? this.savedHeight : 360;
             return this.setPosition({ width: w, height: h });
@@ -78,7 +64,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         return super.close(options);
     }
 
-    async _prepareContext(options) {
+    getData() {
         const globalState = game.settings.get(MODULE_ID, 'tabsState') || {};
         const savedPlaylists = game.settings.get(MODULE_ID, 'savedPlaylists');
         const volume = game.settings.get(MODULE_ID, 'clientVolume');
@@ -102,9 +88,10 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         return { isGM: game.user.isGM, savedPlaylists, tabs: tabsData };
     }
 
-    _onRender(context, options) {
+    activateListeners(html) {
+        super.activateListeners(html);
         try {
-            const appHeader = this.element.closest('.window-app')?.querySelector('.window-header');
+            const appHeader = this.element[0].closest('.window-app')?.querySelector('.window-header');
             if (appHeader) {
                 const newHeader = appHeader.cloneNode(true);
                 appHeader.parentNode.replaceChild(newHeader, appHeader);
@@ -115,12 +102,12 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
             if (!this._resizeObserver) {
                 this._resizeObserver = new ResizeObserver((entries) => {
                     for (const entry of entries) {
-                        if (entry.contentRect.width > 50 && this.element.style.display !== 'none') {
+                        if (entry.contentRect.width > 50 && this.element[0].style.display !== 'none') {
                             this.savedWidth = entry.contentRect.width;
                             this.position.width = entry.contentRect.width;
 
                             const i = this.activeTab;
-                            const el = this.element.querySelector(`#track-title-text-${i}`);
+                            const el = this.element[0].querySelector(`#track-title-text-${i}`);
                             if (el) {
                                 const span = el.querySelector('span');
                                 if (span) this.updateTrackTitle(i, span.innerText);
@@ -133,7 +120,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
             const vol = game.settings.get(MODULE_ID, 'clientVolume');
             if (vol === 0) this.isMuted = true;
-            this.element.querySelectorAll('.volume-mute-btn i').forEach(icon => {
+            this.element[0].querySelectorAll('.volume-mute-btn i').forEach(icon => {
                 icon.className = (vol === 0) ? "fas fa-volume-mute" : "fas fa-volume-up";
             });
 
@@ -142,7 +129,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
                 this._tryInitPlayer(i);
                 if(this.tabsState[i].localVideoId) this._refreshTitle(i, this.tabsState[i].localVideoId);
 
-                const container = this.element.querySelector(`.tube-instance[data-tab-index="${i}"]`);
+                const container = this.element[0].querySelector(`.tube-instance[data-tab-index="${i}"]`);
                 if(!container) continue;
 
                 const smartInp = container.querySelector('input[name="smartInput"]');
@@ -165,7 +152,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
                         if (this.players[i]?.setVolume) this.players[i].setVolume(val);
                         if (val > 0 && this.isMuted) {
                             this.isMuted = false;
-                            this.element.querySelectorAll('.volume-mute-btn i').forEach(ic => ic.className = "fas fa-volume-up");
+                            this.element[0].querySelectorAll('.volume-mute-btn i').forEach(ic => ic.className = "fas fa-volume-up");
                         }
                     };
                     volInput.onchange = async (e) => { await game.settings.set(MODULE_ID, 'clientVolume', parseInt(e.target.value)); };
@@ -233,12 +220,12 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
             }
 
             if (this.isCustomMinimized) {
-                this.element.classList.add('custom-minimized');
+                this.element[0].classList.add('custom-minimized');
                 this.setPosition({ height: 58, width: this.savedWidth });
             }
             const enabled = game.settings.get(MODULE_ID, 'enableTransparency');
             const op = enabled ? game.settings.get(MODULE_ID, 'minimizedOpacity') / 100 : 1;
-            this.element.style.setProperty('--minimized-opacity', op);
+            this.element[0].style.setProperty('--minimized-opacity', op);
         } catch (err) { console.error(err); }
     }
 
@@ -323,14 +310,14 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     _onSwitchTab(event, target) {
         const idx = parseInt(target.dataset.target);
         this.activeTab = idx;
-        this.element.querySelectorAll('.tube-instance').forEach(el => el.classList.remove('active'));
-        this.element.querySelector(`.tube-instance[data-tab-index="${idx}"]`)?.classList.add('active');
-        this.element.querySelectorAll('.channel-btn').forEach(btn => {
+        this.element[0].querySelectorAll('.tube-instance').forEach(el => el.classList.remove('active'));
+        this.element[0].querySelector(`.tube-instance[data-tab-index="${idx}"]`)?.classList.add('active');
+        this.element[0].querySelectorAll('.channel-btn').forEach(btn => {
             const btnTarget = parseInt(btn.dataset.target);
             if (btnTarget === idx) btn.classList.add('active');
             else btn.classList.remove('active');
         });
-            const el = this.element.querySelector(`#track-title-text-${idx}`);
+            const el = this.element[0].querySelector(`#track-title-text-${idx}`);
             if (el) {
                 const span = el.querySelector('span');
                 if (span) this.updateTrackTitle(idx, span.innerText);
@@ -343,7 +330,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     _onToggleInputMode(e, t) { this.toggleInputMode(this.activeTab, t); }
     _onExecuteSmartInput(e, t, forced) { this.executeSmartInput(forced ?? this.activeTab); }
     _onToggleQueue(e, t) {
-        const o=this.element.querySelector(`#queue-overlay-${this.activeTab}`), s=this.element.querySelector(`#search-overlay-${this.activeTab}`);
+        const o=this.element[0].querySelector(`#queue-overlay-${this.activeTab}`), s=this.element[0].querySelector(`#search-overlay-${this.activeTab}`);
         if(o){ o.classList.toggle('hidden'); if(s) s.classList.add('hidden'); t.classList.toggle('active'); }
     }
     _onClearQueue() { Dialog.confirm({ title: "Clear Playlist", content: "<p>Clear playlist?</p>", yes: () => { this.tabsState[this.activeTab].playlist=[]; this.tabsState[this.activeTab].currentIndex=-1; this._syncPlaylistState(this.activeTab); this.updateTrackTitle(this.activeTab, "No Video"); }}); }
@@ -363,10 +350,10 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         }
 
         const vol = game.settings.get(MODULE_ID, 'clientVolume');
-        this.element.querySelectorAll('input[name="volume"]').forEach(i => i.value = vol);
+        this.element[0].querySelectorAll('input[name="volume"]').forEach(i => i.value = vol);
         this.players.forEach(p => { if (p?.setVolume) p.setVolume(vol); });
 
-        this.element.querySelectorAll('.volume-mute-btn i').forEach(icon => {
+        this.element[0].querySelectorAll('.volume-mute-btn i').forEach(icon => {
             icon.className = this.isMuted ? "fas fa-volume-mute" : "fas fa-volume-up";
         });
     }
@@ -374,10 +361,10 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         ui.notifications.info("Syncing with GM...");
         this.emitSocket("requestSync", { tabId: this.activeTab });
     }
-    _onCloseSearch() { this.element.querySelector(`#search-overlay-${this.activeTab}`)?.classList.add('hidden'); }
+    _onCloseSearch() { this.element[0].querySelector(`#search-overlay-${this.activeTab}`)?.classList.add('hidden'); }
     _onSavePreset() { const tab=this.activeTab; if(this.tabsState[tab].playlist.length===0) return ui.notifications.warn("Queue empty"); new Dialog({title:"Save", content:`<form><div class="form-group"><label>Name</label><input type="text" name="name" style="background:#fff;color:#000"/></div></form>`, buttons:{save:{label:"Save", callback:async(h)=>{const n=h.find('input').val().trim(); if(!n)return; const s=game.settings.get(MODULE_ID,'savedPlaylists'); s[n]=this.tabsState[tab].playlist; await game.settings.set(MODULE_ID,'savedPlaylists',s); this.render();}}}}).render(true); }
-    async _onLoadPreset() { const tab=this.activeTab, s=this.element.querySelector(`.preset-select[data-tab="${tab}"]`), n=s.value, sv=game.settings.get(MODULE_ID,'savedPlaylists'); if(sv[n]) { this.tabsState[tab].playlist=[...sv[n]]; this.tabsState[tab].currentIndex=0; await this._syncPlaylistState(tab); if(this.tabsState[tab].playlist.length>0) { this.broadcastState(tab, this.tabsState[tab].playlist[0].id, 0, true); this.updateTrackTitle(tab, this.tabsState[tab].playlist[0].title); } } }
-    async _onDeletePreset() { const tab=this.activeTab, s=this.element.querySelector(`.preset-select[data-tab="${tab}"]`), n=s.value; if(!n)return; const sv=game.settings.get(MODULE_ID,'savedPlaylists'); delete sv[n]; await game.settings.set(MODULE_ID,'savedPlaylists',sv); this.render(); }
+    async _onLoadPreset() { const tab=this.activeTab, s=this.element[0].querySelector(`.preset-select[data-tab="${tab}"]`), n=s.value, sv=game.settings.get(MODULE_ID,'savedPlaylists'); if(sv[n]) { this.tabsState[tab].playlist=[...sv[n]]; this.tabsState[tab].currentIndex=0; await this._syncPlaylistState(tab); if(this.tabsState[tab].playlist.length>0) { this.broadcastState(tab, this.tabsState[tab].playlist[0].id, 0, true); this.updateTrackTitle(tab, this.tabsState[tab].playlist[0].title); } } }
+    async _onDeletePreset() { const tab=this.activeTab, s=this.element[0].querySelector(`.preset-select[data-tab="${tab}"]`), n=s.value; if(!n)return; const sv=game.settings.get(MODULE_ID,'savedPlaylists'); delete sv[n]; await game.settings.set(MODULE_ID,'savedPlaylists',sv); this.render(); }
     _onImportFromClipboard() { const tab=this.activeTab; new Dialog({title:"Import", content:`<form><div class="form-group"><label>URL</label><input type="text" name="url" style="background:#fff;color:#000"/></div></form>`, buttons:{import:{label:"Import", callback:async(h)=>{const u=h.find('input').val().trim(); await this._handleImport(tab, u);}}}}).render(true); }
 
     toggleLoop(tab, target) { this.tabsState[tab].isLooping = !this.tabsState[tab].isLooping; if(target) target.classList.toggle('active'); this.emitSocket("syncLoop", {isLooping: this.tabsState[tab].isLooping, tabId:tab}); }
@@ -385,7 +372,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     toggleInputMode(tab, btn) {
         this.tabsState[tab].isInputMode = !this.tabsState[tab].isInputMode;
 
-        if (!btn) btn = this.element.querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleInputMode"]`);
+        if (!btn) btn = this.element[0].querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleInputMode"]`);
 
         if (btn) {
             const icon = btn.querySelector('i');
@@ -398,23 +385,23 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
             }
         }
 
-        const s = this.element.querySelector(`#view-seeker-${tab}`);
-        const i = this.element.querySelector(`#view-input-${tab}`);
+        const s = this.element[0].querySelector(`#view-seeker-${tab}`);
+        const i = this.element[0].querySelector(`#view-input-${tab}`);
         if (!s || !i) return;
 
         if (this.tabsState[tab].isInputMode) {
             s.style.display = 'none';
             i.style.display = 'flex';
-            setTimeout(() => this.element.querySelector(`#view-input-${tab} input`)?.focus(), 50);
+            setTimeout(() => this.element[0].querySelector(`#view-input-${tab} input`)?.focus(), 50);
         } else {
             s.style.display = 'block';
             i.style.display = 'none';
-            this.element.querySelector(`#search-overlay-${tab}`)?.classList.add('hidden');
+            this.element[0].querySelector(`#search-overlay-${tab}`)?.classList.add('hidden');
         }
     }
 
     async executeSmartInput(tab) {
-        const i = this.element.querySelector(`#view-input-${tab} input`);
+        const i = this.element[0].querySelector(`#view-input-${tab} input`);
         if (!i) return;
         const v = i.value.trim();
         if (!v) return;
@@ -434,8 +421,8 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     _renderPlaylist(tab) {
-        const container = this.element.querySelector(`#playlist-container-${tab}`);
-        const count = this.element.querySelector(`#playlist-count-${tab}`);
+        const container = this.element[0].querySelector(`#playlist-container-${tab}`);
+        const count = this.element[0].querySelector(`#playlist-count-${tab}`);
         if(count) count.innerText = this.tabsState[tab].playlist.length;
         if (container) {
             container.innerHTML = this.tabsState[tab].playlist.length ? '' : '<div class="empty-msg">Playlist is empty</div>';
@@ -494,14 +481,14 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
         }
     }
 
-    _showProgressBar(tab) { const b=this.element.querySelector(`#queue-progress-${tab}`); const f=b?.querySelector('.queue-progress-bar'); if(b&&f){b.classList.add('active');f.style.width='10%';} }
-    _updateProgressBar(tab, p) { const f=this.element.querySelector(`#queue-progress-${tab} .queue-progress-bar`); if(f) f.style.width=`${p}%`; }
-    _hideProgressBar(tab) { const b=this.element.querySelector(`#queue-progress-${tab}`); if(b){ this._updateProgressBar(tab, 100); setTimeout(()=>{b.classList.remove('active');this._updateProgressBar(tab,0);},500); } }
+    _showProgressBar(tab) { const b=this.element[0].querySelector(`#queue-progress-${tab}`); const f=b?.querySelector('.queue-progress-bar'); if(b&&f){b.classList.add('active');f.style.width='10%';} }
+    _updateProgressBar(tab, p) { const f=this.element[0].querySelector(`#queue-progress-${tab} .queue-progress-bar`); if(f) f.style.width=`${p}%`; }
+    _hideProgressBar(tab) { const b=this.element[0].querySelector(`#queue-progress-${tab}`); if(b){ this._updateProgressBar(tab, 100); setTimeout(()=>{b.classList.remove('active');this._updateProgressBar(tab,0);},500); } }
 
     async _handleImport(tab, val) {
         if (val.includes('list=') || val.includes('playlist?')) {
-            const overlay = this.element.querySelector(`#queue-overlay-${tab}`);
-            if(overlay && overlay.classList.contains('hidden')) this.element.querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleQueue"]`).click();
+            const overlay = this.element[0].querySelector(`#queue-overlay-${tab}`);
+            if(overlay && overlay.classList.contains('hidden')) this.element[0].querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleQueue"]`).click();
             this._showProgressBar(tab);
             ui.notifications.info(`Tab ${tab+1}: Scanning Playlist...`);
             const listId = this._extractPlaylistID(val);
@@ -542,14 +529,14 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
             this._syncPlaylistState(tab);
             this.toggleInputMode(tab);
         } else {
-            this.element.querySelector(`#queue-overlay-${tab}`)?.classList.add('hidden');
-            this.element.querySelector(`#search-overlay-${tab}`)?.classList.remove('hidden');
+            this.element[0].querySelector(`#queue-overlay-${tab}`)?.classList.add('hidden');
+            this.element[0].querySelector(`#search-overlay-${tab}`)?.classList.remove('hidden');
             this._performSearch(tab, val);
         }
     }
 
     async _performSearch(tab, q){
-        const c=this.element.querySelector(`#search-container-${tab}`);
+        const c=this.element[0].querySelector(`#search-container-${tab}`);
         c.innerHTML='<div class="empty-msg"><i class="fas fa-spinner fa-spin"></i></div>';
         const results = await this._searchYoutubeScrape(q);
         if(!results.length){ c.innerHTML='<div class="empty-msg">No results.</div>'; return; }
@@ -559,7 +546,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
             el.className='list-item';
             el.innerHTML=`<img src="${v.thumb}" class="list-thumb"><div class="list-info"><div class="list-title" title="${v.title}">${v.title}</div><div class="list-meta">${v.author} • ${v.duration||""}</div></div><button class="list-btn list-add"><i class="fas fa-plus"></i></button><button class="list-btn list-play"><i class="fas fa-play"></i></button>`;
             el.querySelector('.list-add').addEventListener('click',(e)=>{e.stopPropagation();this.tabsState[tab].playlist.push(v);if (this.tabsState[tab].currentIndex === -1) { this.tabsState[tab].currentIndex = 0; this.broadcastState(tab, v.id, 0, true); this.updateTrackTitle(tab, v.title); } this._syncPlaylistState(tab);ui.notifications.info(`Added: ${v.title}`);});
-            el.querySelector('.list-play').addEventListener('click',(e)=>{e.stopPropagation();this.playVideoNow(tab, v);this.element.querySelector(`#search-overlay-${tab}`)?.classList.add('hidden');this.toggleInputMode(tab);});
+            el.querySelector('.list-play').addEventListener('click',(e)=>{e.stopPropagation();this.playVideoNow(tab, v);this.element[0].querySelector(`#search-overlay-${tab}`)?.classList.add('hidden');this.toggleInputMode(tab);});
             c.appendChild(el);
         });
     }
@@ -680,8 +667,8 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
     _extractPlaylistID(url) { const m = url.match(/[&?]list=([a-zA-Z0-9_-]+)/); return m ? m[1] : null; }
 
     updateTrackTitle(tabId, text) {
-        const container = this.element.querySelector(`#view-seeker-${tabId} .track-info`);
-        const el = this.element.querySelector(`#track-title-text-${tabId}`);
+        const container = this.element[0].querySelector(`#view-seeker-${tabId} .track-info`);
+        const el = this.element[0].querySelector(`#track-title-text-${tabId}`);
         if (!el || !container) return;
         const safeText = text || "No Video";
         el.classList.remove('scrolling');
@@ -715,7 +702,7 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     _tryInitPlayer(tab) {
         if (!window.YT?.Player) { setTimeout(() => this._tryInitPlayer(tab), 500); return; }
-        const container = this.element.querySelector(`#foundry-tube-player-${tab}`);
+        const container = this.element[0].querySelector(`#foundry-tube-player-${tab}`);
         if (!container) return;
         if (this.players[tab] && document.getElementById(`foundry-tube-iframe-${tab}`)) return;
         const videoId = this.tabsState[tab].localVideoId || "";
@@ -741,9 +728,9 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
                 },
                 'onStateChange': (e) => {
                     const isPlaying = e.data === YT.PlayerState.PLAYING;
-                    const btn = this.element.querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="togglePlayback"] i`);
+                    const btn = this.element[0].querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="togglePlayback"] i`);
                     if (btn) btn.className = isPlaying ? "fas fa-pause" : "fas fa-play";
-                    this.element.querySelectorAll(`.channel-btn[data-target="${tab}"]`).forEach(b => {
+                    this.element[0].querySelectorAll(`.channel-btn[data-target="${tab}"]`).forEach(b => {
                         if (isPlaying) b.classList.add('playing'); else b.classList.remove('playing');
                     });
                         if (isPlaying) this._refreshTitle(tab, this.tabsState[tab].localVideoId);
@@ -764,9 +751,9 @@ class FoundryTubeApp extends HandlebarsApplicationMixin(ApplicationV2) {
             try {
                 const cur = p.getCurrentTime();
                 const dur = p.getDuration();
-                const time = this.element.querySelector(`#current-time-${tab}`);
-                const durl = this.element.querySelector(`#duration-time-${tab}`);
-                const seek = this.element.querySelector(`.tube-instance[data-tab-index="${tab}"] .video-seeker`);
+                const time = this.element[0].querySelector(`#current-time-${tab}`);
+                const durl = this.element[0].querySelector(`#duration-time-${tab}`);
+                const seek = this.element[0].querySelector(`.tube-instance[data-tab-index="${tab}"] .video-seeker`);
                 if(time) time.innerText = this._fmt(cur);
                 if(durl) durl.innerText = this._fmt(dur);
                 if(seek) { seek.max = dur; if(document.activeElement !== seek) seek.value = cur; }
@@ -786,7 +773,7 @@ Hooks.once('init', () => {
     game.settings.register(MODULE_ID, 'savedPlaylists', { scope: 'world', config: false, type: Object, default: {} });
     game.settings.register(MODULE_ID, 'autoplayStart', { name: "Auto play on Startup", hint: "If disabled, video will not start automatically when you log in.", scope: 'client', config: true, type: Boolean, default: false });
     game.settings.register(MODULE_ID, 'hideOnStartup', { name: "Hide on Startup", hint: "If enabled, the player widget will be hidden when you load the world.", scope: 'client', config: true, type: Boolean, default: true });
-    game.settings.register(MODULE_ID, 'enableTransparency', { name: "Enable Transparency", hint: "If enabled, minimized player becomes transparent when not hovered.", scope: 'client', config: true, type: Boolean, default: true, onChange: () => { const app = window.tubeApp; if(app && app.element) { const op = game.settings.get(MODULE_ID, 'enableTransparency') ? game.settings.get(MODULE_ID, 'minimizedOpacity')/100 : 1; app.element.style.setProperty('--minimized-opacity', op); } } });
+    game.settings.register(MODULE_ID, 'enableTransparency', { name: "Enable Transparency", hint: "If enabled, minimized player becomes transparent when not hovered.", scope: 'client', config: true, type: Boolean, default: true, onChange: () => { const app = window.tubeApp; if(app && app.element[0]) { const op = game.settings.get(MODULE_ID, 'enableTransparency') ? game.settings.get(MODULE_ID, 'minimizedOpacity')/100 : 1; app.element[0].style.setProperty('--minimized-opacity', op); } } });
     game.settings.register(MODULE_ID, 'minimizedOpacity', { name: "Minimized Opacity (%)", hint: "Opacity of the player when minimized and not hovered (0-100).", scope: 'client', config: true, type: Number, default: 50, range: { min: 0, max: 100, step: 5 }, onChange: v => { const el = document.getElementById('foundry-tube-app'); if(el && game.settings.get(MODULE_ID, 'enableTransparency')) el.style.setProperty('--minimized-opacity', v / 100); } });
 
     if (!document.getElementById('yt-api-script')) {
@@ -798,11 +785,11 @@ Hooks.once('ready', () => {
     tubeApp = new FoundryTubeApp();
     window.tubeApp = tubeApp;
     const m = game.modules.get(MODULE_ID);
-    if (m) m.api = { open: () => tubeApp.render({ force: true }) };
+    if (m) m.api = { open: () => tubeApp.render(true) };
 
     setTimeout(async () => {
-        await tubeApp.render({ force: true });
-        if (game.settings.get(MODULE_ID, 'hideOnStartup') && tubeApp.element) tubeApp.element.style.display = 'none';
+        await tubeApp.render(true);
+        if (game.settings.get(MODULE_ID, 'hideOnStartup') && tubeApp.element[0]) tubeApp.element[0].style.display = 'none';
     }, 1000);
 
         game.socket.on(SOCKET_NAME, (p) => {
@@ -819,13 +806,13 @@ Hooks.once('ready', () => {
             }
             else if (p.action === "syncLoop") {
                 tubeApp.tabsState[tab].isLooping = p.isLooping;
-                const btn = tubeApp.element.querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleLoop"]`);
+                const btn = tubeApp.element[0].querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleLoop"]`);
                 if(btn) p.isLooping ? btn.classList.add('active') : btn.classList.remove('active');
             }
             else if (p.action === "syncShuffle") {
                 tubeApp.tabsState[tab].isShuffling = p.isShuffling;
-                const btn = tubeApp.element.querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleShuffle"]`);
-                if(btn) p.isLooping ? btn.classList.add('active') : btn.classList.remove('active');
+                const btn = tubeApp.element[0].querySelector(`.tube-instance[data-tab-index="${tab}"] [data-action="toggleShuffle"]`);
+                if(btn) p.isShuffling ? btn.classList.add('active') : btn.classList.remove('active');
             }
             else if (p.action === "syncState") {
                 if (p.videoId !== tubeApp.tabsState[tab].localVideoId) {
@@ -900,16 +887,16 @@ Hooks.on('getSceneControlButtons', (controls) => {
             const app = window.tubeApp;
             if (!app) return;
 
-            if (!app.element) {
-                app.render({ force: true });
+            if (!app.element || !app.element[0]) {
+                app.render(true);
                 return;
             }
 
-            if (app.element.style.display === "none") {
-                app.element.style.display = "";
+            if (app.element[0].style.display === "none") {
+                app.element[0].style.display = "";
                 app.bringToFront();
             } else {
-                app.element.style.display = "none";
+                app.element[0].style.display = "none";
             }
         }
     };
