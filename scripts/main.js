@@ -70,8 +70,8 @@ class NovaRedLiveApp extends Application {
         const volume = game.settings.get(MODULE_ID, 'clientVolume');
         const tabsData = [];
         for(let i=0; i<5; i++) {
+            const s = globalState[i] || {};
             if (!this.tabsState[i].loaded) {
-                const s = globalState[i] || {};
                 this.tabsState[i].playlist = s.playlist || [];
                 this.tabsState[i].currentIndex = s.currentIndex ?? -1;
                 this.tabsState[i].localVideoId = s.videoId || "";
@@ -79,6 +79,7 @@ class NovaRedLiveApp extends Application {
                 this.tabsState[i].isShuffling = s.isShuffling || false;
                 this.tabsState[i].loaded = true;
             }
+            console.log('NovaRedLiveApp | getData tab', i, 'globalState:', JSON.stringify(s).substring(0,100), 'local playlist len:', this.tabsState[i].playlist.length);
             tabsData.push({
                 index: i, humanIndex: i + 1, isActive: (i === this.activeTab),
                           title: this.tabsState[i].playlist[this.tabsState[i].currentIndex]?.title || "No Video",
@@ -495,8 +496,9 @@ class NovaRedLiveApp extends Application {
                         if (e.target.closest('.list-remove')) {
                             e.stopPropagation();
                             this.tabsState[tab].playlist.splice(i, 1);
+                            if(this.tabsState[tab].currentIndex >= this.tabsState[tab].playlist.length) this.tabsState[tab].currentIndex = this.tabsState[tab].playlist.length - 1;
                             if(i < this.tabsState[tab].currentIndex) this.tabsState[tab].currentIndex--;
-                            else if(i === this.tabsState[tab].currentIndex && this.tabsState[tab].playlist.length > 0) {
+                            if(this.tabsState[tab].currentIndex >= 0 && this.tabsState[tab].playlist.length > 0) {
                                 const v = this.tabsState[tab].playlist[this.tabsState[tab].currentIndex];
                                 this.broadcastState(tab, v.id, 0, true);
                                 this.updateTrackTitle(tab, v.title);
@@ -807,10 +809,24 @@ Hooks.once('init', () => {
     game.settings.register(MODULE_ID, 'tabsState', { scope: 'world', config: false, type: Object, default: {} });
     game.settings.register(MODULE_ID, 'clientVolume', { scope: 'client', config: false, type: Number, default: 50 });
     game.settings.register(MODULE_ID, 'savedPlaylists', { scope: 'world', config: false, type: Object, default: {} });
-    game.settings.register(MODULE_ID, 'autoplayStart', { name: "Auto play on Startup", hint: "If disabled, video will not start automatically when you log in.", scope: 'client', config: true, type: Boolean, default: false });
-    game.settings.register(MODULE_ID, 'hideOnStartup', { name: "Hide on Startup", hint: "If enabled, the player widget will be hidden when you load the world.", scope: 'client', config: true, type: Boolean, default: true });
+    game.settings.register(MODULE_ID, 'autoplayStart', { name: "Auto play on Startup", hint: "If disabled, video will not start automatically when you log in.", scope: 'client', config: true, type: Boolean, default: false, onChange: () => { console.log('NovaRedLiveApp | autoplayStart changed (takes effect on next video load)'); } });
+    game.settings.register(MODULE_ID, 'hideOnStartup', { name: "Hide on Startup", hint: "If enabled, the player widget will be hidden when you load the world.", scope: 'client', config: true, type: Boolean, default: true, onChange: (v) => { const app = window.tubeApp; if(app && app.element && app.element[0]) { app.element[0].style.display = v ? 'none' : ''; console.log('NovaRedLiveApp | hideOnStartup changed, display=' + (v ? 'none' : '')); } } });
     game.settings.register(MODULE_ID, 'enableTransparency', { name: "Enable Transparency", hint: "If enabled, minimized player becomes transparent when not hovered.", scope: 'client', config: true, type: Boolean, default: true, onChange: () => { const app = window.tubeApp; if(app && app.element[0]) { const op = game.settings.get(MODULE_ID, 'enableTransparency') ? game.settings.get(MODULE_ID, 'minimizedOpacity')/100 : 1; app.element[0].style.setProperty('--minimized-opacity', op); } } });
     game.settings.register(MODULE_ID, 'minimizedOpacity', { name: "Minimized Opacity (%)", hint: "Opacity of the player when minimized and not hovered (0-100).", scope: 'client', config: true, type: Number, default: 50, range: { min: 0, max: 100, step: 5 }, onChange: v => { const el = document.getElementById('foundry-tube-app'); if(el && game.settings.get(MODULE_ID, 'enableTransparency')) el.style.setProperty('--minimized-opacity', v / 100); } });
+
+    const OLD_MODULE_ID = 'foundry-tube';
+    if (OLD_MODULE_ID !== MODULE_ID) {
+        const oldTabs = game.settings.get(OLD_MODULE_ID, 'tabsState', { noError: true });
+        const oldPlaylists = game.settings.get(OLD_MODULE_ID, 'savedPlaylists', { noError: true });
+        const newTabs = game.settings.get(MODULE_ID, 'tabsState') || {};
+        const newPlaylists = game.settings.get(MODULE_ID, 'savedPlaylists') || {};
+        if (oldTabs && Object.keys(oldTabs).length > 0 && Object.keys(newTabs).length === 0) {
+            game.settings.set(MODULE_ID, 'tabsState', oldTabs).then(() => console.log('NovaRedLiveApp | migrated tabsState from foundry-tube')).catch(() => {});
+        }
+        if (oldPlaylists && Object.keys(oldPlaylists).length > 0 && Object.keys(newPlaylists).length === 0) {
+            game.settings.set(MODULE_ID, 'savedPlaylists', oldPlaylists).then(() => console.log('NovaRedLiveApp | migrated savedPlaylists from foundry-tube')).catch(() => {});
+        }
+    }
 
     if (!document.getElementById('yt-api-script')) {
         const tag = document.createElement('script'); tag.id = 'yt-api-script'; tag.src = "https://www.youtube.com/iframe_api";
@@ -922,18 +938,21 @@ Hooks.on('getSceneControlButtons', (controls) => {
         button: true,
         onChange: () => {
             const app = window.tubeApp;
-            if (!app) return;
+            if (!app) { console.warn('NovaRedLiveApp | toggle: tubeApp not found'); return; }
 
             if (!app.element || !app.element[0]) {
-                app.render(true);
+                console.log('NovaRedLiveApp | toggle: app not rendered yet, calling render');
+                app.render(true).catch(err => console.error('NovaRedLiveApp | toggle render error:', err));
                 return;
             }
 
-            if (app.element[0].style.display === "none") {
-                app.element[0].style.display = "";
+            const isHidden = window.getComputedStyle(app.element[0]).display === 'none';
+            console.log('NovaRedLiveApp | toggle: isHidden=' + isHidden);
+            if (isHidden) {
+                app.element[0].style.display = '';
                 app.bringToFront();
             } else {
-                app.element[0].style.display = "none";
+                app.element[0].style.display = 'none';
             }
         }
     };

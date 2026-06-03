@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5] — 2026-06-03
+
+### Fixed
+- `scripts/main.js`: Crash when removing last playlist item while it's the current track — `currentIndex` stayed out-of-bounds after `splice()`, causing `v.id` to throw TypeError at line 501 (C3 — CRITICAL)
+- `scripts/main.js`: Playlists appearing empty on page reload — `getData()` used a `loaded` flag that prevented reloading from `game.settings` on re-render; removed the guard and always sync from persisted state (P1)
+- `scripts/main.js`: Live Player scene button now uses `window.getComputedStyle()` for robust visibility detection and adds `.catch()` on the `render()` promise
+- `scripts/main.js`: `hideOnStartup` and `autoplayStart` settings now have `onChange` handlers that immediately affect the running app (not just after next reload)
+
+### Added
+- `scripts/main.js`: Settings migration in `init` hook — checks for old `foundry-tube` namespace data and migrates `tabsState` and `savedPlaylists` to `nova-red-live` if target is empty
+- `scripts/main.js`: Debug logging in `getData()` showing loaded playlist lengths per tab for future diagnostics
+
+### Changed
+- `module.json`: version → `0.0.5`
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [0.0.4] — 2026-06-03
 
 ### Fixed
@@ -83,6 +101,24 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [0.0.5] — 2026-06-03
+
+### Corregido
+- `scripts/main.js`: Crash al eliminar el último item del playlist mientras es el track actual — `currentIndex` quedaba fuera de rango tras `splice()`, causando TypeError en `v.id` en línea 501 (C3 — CRÍTICO)
+- `scripts/main.js`: Playlists aparecían vacías al recargar página — `getData()` usaba flag `loaded` que impedía recargar desde `game.settings` en re-renders; se eliminó el guard y ahora siempre sincroniza desde estado persistido (P1)
+- `scripts/main.js`: Botón Live Player ahora usa `window.getComputedStyle()` para detección robusta de visibilidad y agrega `.catch()` en la promesa `render()`
+- `scripts/main.js`: Settings `hideOnStartup` y `autoplayStart` ahora tienen handlers `onChange` que afectan la app inmediatamente (no solo tras recargar)
+
+### Añadido
+- `scripts/main.js`: Migración de settings en hook `init` — verifica datos viejos del namespace `foundry-tube` y migra `tabsState` y `savedPlaylists` a `nova-red-live` si el destino está vacío
+- `scripts/main.js`: Logging de depuración en `getData()` mostrando longitudes de playlist cargadas por tab para diagnóstico futuro
+
+### Cambiado
+- `module.json`: versión → `0.0.5`
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [0.0.4] — 2026-06-03
 
