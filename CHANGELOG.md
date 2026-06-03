@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] — 2026-06-03
+
+### Added
+- **`scripts/PipedProxy.mjs`**: New module — server-side socket bridge for Piped API. Uses Foundry's `game.socket` to relay proxy requests from browser clients to the Node.js server, which makes unrestricted HTTP requests (`fetch()`) to Piped instances. Server detected via `typeof window === 'undefined'`. Includes 15s timeout per request, unique request IDs, and concurrent request support via `pending` Map.
+- **`scripts/main.mjs`**: Added `PipedProxy.init()` call in `ready` hook, runs before `ChannelManager` initialization to ensure proxy is available for import operations.
+- **`module.json`**: Added `"socket": true` flag to enable Foundry socket API for server-side proxy.
+
+### Changed
+- **`scripts/YouTubeImporter.mjs`**: `fetchFromPiped()` now has 3-tier fallback:
+  1. **Socket proxy** (server-side, no CORS) — new Tier 1
+  2. **Direct Piped call** (may work in Electron desktop client)
+  3. **CORS proxies** (allorigins, corsproxy.io) — removed `codetabs` and `cors.sh` (unreliable)
+- **`scripts/constants.mjs`**: Replaced dead Piped instances `silentx.me` (DNS) and `qdi.ax` (DNS) with `pipedapi.adminforge.de` and `pipedapi.oxy.wiki`
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.2] — 2026-06-03
 
 ### Fixed
@@ -148,6 +165,23 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.3] — 2026-06-03
+
+### Añadido
+- **`scripts/PipedProxy.mjs`**: Nuevo módulo — puente socket server-side para Piped API. Usa `game.socket` de Foundry para relayar peticiones proxy desde clientes navegador al servidor Node.js, que hace peticiones HTTP sin restricciones CORS. El servidor se detecta via `typeof window === 'undefined'`. Incluye timeout de 15s por petición, IDs de request únicos, y soporte de peticiones concurrentes via Map `pending`.
+- **`scripts/main.mjs`**: Añadida llamada `PipedProxy.init()` en hook `ready`, ejecutada antes de inicializar `ChannelManager` para asegurar que el proxy está disponible para importaciones.
+- **`module.json`**: Añadido flag `"socket": true` para habilitar API de socket de Foundry para proxy server-side.
+
+### Cambiado
+- **`scripts/YouTubeImporter.mjs`**: `fetchFromPiped()` ahora tiene 3 niveles de fallback:
+  1. **Socket proxy** (server-side, sin CORS) — nuevo Tier 1
+  2. **Llamada directa Piped** (puede funcionar en cliente desktop Electron)
+  3. **Proxies CORS** (allorigins, corsproxy.io) — eliminados `codetabs` y `cors.sh` (no confiables)
+- **`scripts/constants.mjs`**: Reemplazadas instancias Piped caídas `silentx.me` (DNS) y `qdi.ax` (DNS) por `pipedapi.adminforge.de` y `pipedapi.oxy.wiki`
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.2] — 2026-06-03
 

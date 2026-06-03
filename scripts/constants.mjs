@@ -28,8 +28,8 @@ export const PIPED_INSTANCES = [
   'https://pipedapi.kavin.rocks',
   'https://pipedapi.leptons.xyz',
   'https://piped-api.lunar.icu',
-  'https://pipedapi.silentx.me',
-  'https://pipedapi.qdi.ax'
+  'https://pipedapi.adminforge.de',
+  'https://pipedapi.oxy.wiki'
 ];
 
 export const SETTINGS = {
