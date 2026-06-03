@@ -1,5 +1,10 @@
 import { PIPED_INSTANCES, MODULE_ID } from './constants.mjs';
 
+const CORS_PROXIES = [
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?'
+];
+
 export class YouTubeImporter {
   static async fetchFromPiped(endpoint) {
     for (const instance of PIPED_INSTANCES) {
@@ -10,6 +15,18 @@ export class YouTubeImporter {
         return await res.json();
       } catch (e) {
         continue;
+      }
+    }
+    for (const proxy of CORS_PROXIES) {
+      for (const instance of PIPED_INSTANCES) {
+        try {
+          const url = `${proxy}${encodeURIComponent(`${instance}${endpoint}`)}`;
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          return await res.json();
+        } catch (e) {
+          continue;
+        }
       }
     }
     return null;
@@ -83,15 +100,17 @@ export class YouTubeImporter {
   }
 
   static async importFromUrl(input) {
-    const playlistId = this.extractPlaylistId(input);
+    const isUrl = /^(https?:\/\/)/i.test(input);
+    const playlistId = isUrl ? this.extractPlaylistId(input) : null;
     if (playlistId) {
       const videos = await this.getPlaylistVideos(playlistId);
       if (videos.length > 0) return { type: 'playlist', videos };
     }
-    const videoId = this.extractVideoId(input);
+    const videoId = isUrl ? this.extractVideoId(input) : null;
     if (videoId) {
       const info = await this.getStreamInfo(videoId);
       if (info) return { type: 'track', info };
+      return null;
     }
     const results = await this.search(input);
     if (results.length > 0) return { type: 'search', results };

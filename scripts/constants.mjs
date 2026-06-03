@@ -12,7 +12,7 @@ export const CHANNELS = {
     id: 'ambience',
     label: 'nova-red-live.channelLabels.ambience',
     icon: 'fas fa-cloud-rain',
-    playlistMode: 3,
+    playlistMode: 2,
     defaultVolume: 0.3
   },
   effects: {

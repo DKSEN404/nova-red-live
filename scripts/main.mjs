@@ -40,12 +40,14 @@ Hooks.once('ready', async () => {
     };
   }
 
-  setTimeout(async () => {
-    await audioDirector.render(true);
-    if (game.settings.get(MODULE_ID, 'hideOnStartup') && audioDirector.element[0]) {
-      audioDirector.element[0].style.display = 'none';
-    }
-  }, 1000);
+  if (game.user.isGM) {
+    setTimeout(async () => {
+      await audioDirector.render(true);
+      if (game.settings.get(MODULE_ID, 'hideOnStartup')) {
+        audioDirector.close();
+      }
+    }, 1000);
+  }
 
   Hooks.on('canvasReady', () => {
     if (!game.user.isGM) return;
@@ -62,16 +64,10 @@ Hooks.on('getSceneControlButtons', (controls) => {
     button: true,
     onClick: () => {
       if (!audioDirector) return;
-      if (!audioDirector.element || !audioDirector.element[0]) {
-        audioDirector.render(true);
-        return;
-      }
-      const isHidden = window.getComputedStyle(audioDirector.element[0]).display === 'none';
-      if (isHidden) {
-        audioDirector.element[0].style.display = '';
-        audioDirector.bringToFront();
+      if (audioDirector.rendered) {
+        audioDirector.close();
       } else {
-        audioDirector.element[0].style.display = 'none';
+        audioDirector.render(true);
       }
     }
   };

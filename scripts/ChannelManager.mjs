@@ -28,12 +28,17 @@ export class ChannelManager {
     const name = this._playlistName(channelId);
     let playlist = game.playlists.find(p => p.name.startsWith(PLAYLIST_PREFIX) && p.flags?.[MODULE_ID]?.channel === channelId);
     if (!playlist) {
-      playlist = await Playlist.create({
-        name,
-        mode: CHANNELS[channelId].playlistMode,
-        permission: { default: 2 },
-        flags: { [MODULE_ID]: { channel: channelId } }
-      });
+      try {
+        playlist = await Playlist.create({
+          name,
+          mode: CHANNELS[channelId].playlistMode,
+          permission: { default: 2 },
+          flags: { [MODULE_ID]: { channel: channelId } }
+        });
+      } catch (e) {
+        console.error(`${MODULE_ID} | Failed to create playlist for ${channelId}:`, e);
+        return null;
+      }
     }
     this.playlists[channelId] = playlist;
     return playlist;
@@ -123,11 +128,11 @@ export class ChannelManager {
     const currentSound = playlist?.sounds?.find(s => s.playing);
     return {
       channel: channelId,
-      playing: this.playing[channelId],
-      looping: this.looping[channelId],
-      volume: this.volumes[channelId],
+      playing: this.playing[channelId] || false,
+      looping: this.looping[channelId] || false,
+      volume: this.volumes[channelId] || 0.5,
       currentTrack: currentSound ? { id: currentSound.id, name: currentSound.name, duration: currentSound.duration } : null,
-      trackCount: playlist?.sounds?.size || 0
+      trackCount: playlist?.sounds?.size ?? 0
     };
   }
 

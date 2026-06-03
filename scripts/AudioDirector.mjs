@@ -137,7 +137,8 @@ export class AudioDirector extends Application {
 
   async _onImportUrl(event, target) {
     const ch = target.dataset.channel;
-    const input = this.element[0].querySelector(`#nr-import-input-${ch}`);
+    let input = this.element[0].querySelector(`#nr-import-input-${ch}`);
+    if (!input) input = this.element[0].querySelector('#nr-import-input');
     if (!input) return;
     const val = input.value.trim();
     if (!val) return;
@@ -146,9 +147,10 @@ export class AudioDirector extends Application {
   }
 
   async _handleImport(val, channelId) {
+    if (!val) return;
     const result = await YouTubeImporter.importFromUrl(val);
     if (!result) {
-      ui.notifications.warn('Could not find anything for that URL/query');
+      ui.notifications.warn(game.i18n.localize('nova-red-live.import.notFound') || 'Could not find anything for that URL/query');
       return;
     }
 
@@ -253,7 +255,6 @@ export class AudioDirector extends Application {
   }
 
   async close(options = {}) {
-    if (!options.force) return;
     return super.close(options);
   }
 }

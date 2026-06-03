@@ -17,26 +17,38 @@
 }
 
 #nova-red-live-app .window-header {
-    flex: 0 0 10px !important;
-    height: 10px !important;
-    min-height: 10px !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 24px !important;
     background: #1a1208 !important;
-    border-bottom: none !important;
-    padding: 0 !important;
+    border-bottom: 1px solid #332200 !important;
+    padding: 2px 6px !important;
     margin: 0 !important;
-    opacity: 0.5 !important;
     cursor: grab !important;
     z-index: 1000;
-    overflow: hidden !important;
+    color: #ffb000;
+    font-size: 11px;
 }
 
 #nova-red-live-app .window-header:active {
     cursor: grabbing !important;
-    background: #1a1208 !important;
-    opacity: 1 !important;
 }
 
-#nova-red-live-app .window-header * { display: none !important; }
+#nova-red-live-app .window-header .window-title {
+    color: #ffb000;
+    font-size: 11px;
+    line-height: 22px;
+}
+
+#nova-red-live-app .window-header a {
+    color: #887766;
+    font-size: 11px;
+}
+
+#nova-red-live-app .window-header a:hover {
+    color: #ffb000;
+    text-shadow: none;
+}
 
 #nova-red-live-app .window-content {
     background: transparent !important;

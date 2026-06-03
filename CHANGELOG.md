@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] — 2026-06-03
+
+### Fixed
+- **`scripts/constants.mjs`**: `ambience.playlistMode` changed from `3` to `2`. Foundry v12 only supports modes 0 (sequential), 1 (shuffle), 2 (simultaneous). Mode `3` caused `Playlist.create()` validation failure → cascading crash → `TypeError: playlist.play is not a function` (B1 — CRITICAL)
+- **`scripts/AudioDirector.mjs`**: Removed `close()` override that blocked all close attempts (X button, Escape key, programmatic close). Foundry v12 `Application` handles close natively — no override needed. (B2 — CRITICAL)
+- **`scripts/AudioDirector.mjs`**: `_onImportUrl()` now falls back to `#nr-import-input` (top bar input) when per-channel `#nr-import-input-${ch}` doesn't exist. Previously only scanned per-channel inputs. (B4)
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` now validates `val` before use and sanitizes `.warn()` message with `game.i18n.localize(...)` fallback instead of bare string. (B4)
+- **`scripts/main.mjs`**: Toggle button now uses `audioDirector.close()` / `audioDirector.render(true)` natively instead of `style.display = 'none'/'block'`. Combined with the `close()` override fix, the window can now be toggled properly. (B2)
+- **`scripts/main.mjs`**: `hideOnStartup` now only executes for GM users (`if (game.user.isGM)`) and uses `audioDirector.close()` instead of `style.display = 'none'`. (B2)
+- **`scripts/YouTubeImporter.mjs`**: Added CORS proxy chain (`api.allorigins.win`, `corsproxy.io`) as second-level fallback after direct Piped instance attempts. Browser `fetch()` cannot access Piped API directly due to missing CORS headers. (B3 — CRITICAL)
+- **`scripts/YouTubeImporter.mjs`**: `importFromUrl()` now checks `isUrl` before extracting video/playlist IDs. If a URL fails `getStreamInfo()`, returns `null` instead of falling back to `search()` with the full URL as query. (B4)
+- **`scripts/ChannelManager.mjs`**: `_findOrCreatePlaylist()` wrapped in `try/catch` to handle `Playlist.create()` validation errors gracefully instead of crashing. (B1)
+- **`scripts/ChannelManager.mjs`**: `getState()` now uses `??` (nullish coalescing) and explicit defaults (`false`, `0.5`, `0`) instead of bare `undefined` values. (B1)
+- **`styles/nova-red-live.css`**: Restored native `window-header` chrome (24px min-height, visible title, functional close/minimize buttons). Removed `display: none !important` on children and `overflow: hidden` that disabled all window controls. (B2)
+
+### Changed
+- `module.json`: version → `1.0.1`
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.0] — 2026-06-03
 
 ### Added
@@ -114,6 +135,27 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.1] — 2026-06-03
+
+### Corregido
+- **`scripts/constants.mjs`**: `ambience.playlistMode` cambiado de `3` a `2`. Foundry v12 solo soporta modos 0 (secuencial), 1 (aleatorio), 2 (simultáneo). El modo `3` causaba fallo de validación en `Playlist.create()` → error en cascada → `TypeError: playlist.play is not a function` (B1 — CRÍTICO)
+- **`scripts/AudioDirector.mjs`**: Eliminada la sobreescritura de `close()` que bloqueaba todos los intentos de cierre (botón X, tecla Escape, cierre programático). Foundry v12 `Application` maneja el cierre de forma nativa — no necesita override. (B2 — CRÍTICO)
+- **`scripts/AudioDirector.mjs`**: `_onImportUrl()` ahora usa `#nr-import-input` (input de la barra superior) como fallback cuando el input por canal `#nr-import-input-${ch}` no existe. Anteriormente solo escaneaba inputs por canal. (B4)
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` ahora valida `val` antes de usarlo y sanitiza el mensaje de `.warn()` con `game.i18n.localize(...)` en vez de un string sin localizar. (B4)
+- **`scripts/main.mjs`**: El botón toggle ahora usa `audioDirector.close()` / `audioDirector.render(true)` nativos en vez de `style.display = 'none'/'block'`. Combinado con la corrección del `close()`, la ventana ahora se puede ocultar/mostrar correctamente. (B2)
+- **`scripts/main.mjs`**: `hideOnStartup` ahora solo se ejecuta para GMs (`if (game.user.isGM)`) y usa `audioDirector.close()` en vez de `style.display = 'none'`. (B2)
+- **`scripts/YouTubeImporter.mjs`**: Añadida cadena de proxies CORS (`api.allorigins.win`, `corsproxy.io`) como segundo nivel de fallback tras intentos directos a instancias Piped. El `fetch()` del navegador no puede acceder a la API de Piped directamente por falta de cabeceras CORS. (B3 — CRÍTICO)
+- **`scripts/YouTubeImporter.mjs`**: `importFromUrl()` ahora verifica `isUrl` antes de extraer IDs de video/playlist. Si una URL falla en `getStreamInfo()`, retorna `null` en vez de caer en `search()` con la URL completa como consulta. (B4)
+- **`scripts/ChannelManager.mjs`**: `_findOrCreatePlaylist()` envuelto en `try/catch` para manejar errores de validación de `Playlist.create()` sin colgar el módulo. (B1)
+- **`scripts/ChannelManager.mjs`**: `getState()` ahora usa `??` (coalescencia nula) y valores por defecto explícitos (`false`, `0.5`, `0`) en vez de valores `undefined`. (B1)
+- **`styles/nova-red-live.css`**: Restaurado el `window-header` nativo (24px de alto mínimo, título visible, botones de cerrar/minimizar funcionales). Eliminados `display: none !important` en hijos y `overflow: hidden` que deshabilitaban todos los controles de ventana. (B2)
+
+### Cambiado
+- `module.json`: versión → `1.0.1`
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.0] — 2026-06-03
 
