@@ -1,4 +1,4 @@
-const MODULE_ID = 'foundry-tube';
+const MODULE_ID = 'nova-red-live';
 const SOCKET_NAME = `module.${MODULE_ID}`;
 const PROXIES = [
     (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
@@ -6,7 +6,7 @@ const PROXIES = [
     (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`
 ];
 
-class FoundryTubeApp extends Application {
+class NovaRedLiveApp extends Application {
     constructor() {
         super();
         window.tubeApp = this;
@@ -28,7 +28,7 @@ class FoundryTubeApp extends Application {
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
             id: "foundry-tube-app",
-            title: "Tube",
+            title: "Live Player",
             template: `modules/${MODULE_ID}/templates/widget.hbs`,
             width: 580,
             height: 360,
@@ -782,7 +782,7 @@ Hooks.once('init', () => {
     }
 });
 Hooks.once('ready', () => {
-    tubeApp = new FoundryTubeApp();
+    tubeApp = new NovaRedLiveApp();
     window.tubeApp = tubeApp;
     const m = game.modules.get(MODULE_ID);
     if (m) m.api = { open: () => tubeApp.render(true) };
@@ -877,9 +877,10 @@ Hooks.once('ready', () => {
         });
 });
 Hooks.on('getSceneControlButtons', (controls) => {
+    if (!game.user.isGM) return;
     const toolConfig = {
         name: "tube-toggle",
-        title: "Tube Player",
+        title: "Live Player",
         icon: "fas fa-tv",
         visible: true,
         button: true,
