@@ -1,0 +1,92 @@
+<div class="nr-content">
+    {{#if isGM}}
+    <div class="nr-import-bar">
+        <select class="nr-channel-select" id="nr-import-channel">
+            {{#each channels}}
+            <option value="{{this.id}}">{{this.label}}</option>
+            {{/each}}
+        </select>
+        <input type="text" id="nr-import-input" placeholder="YouTube URL or search..." autocomplete="off">
+        <button type="button" data-action="import-url" data-channel="{{channels.0.id}}" title="Import"><i class="fas fa-arrow-right"></i></button>
+    </div>
+    {{/if}}
+
+    {{#if searchResults}}
+    <div class="nr-search-panel">
+        <div class="nr-search-header">
+            <span>Search: "{{searchResults.query}}"</span>
+            <button type="button" data-action="search-close" class="nr-btn-small"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="nr-search-results">
+            {{#each searchResults.results}}
+            <div class="nr-search-item" data-action="search-select" data-videoid="{{this.videoId}}">
+                {{#if this.thumbnail}}<img src="{{this.thumbnail}}" class="nr-search-thumb" alt="">{{/if}}
+                <div class="nr-search-info">
+                    <div class="nr-search-title">{{this.title}}</div>
+                    <div class="nr-search-meta">{{this.author}} &bull; {{this.duration}}s</div>
+                </div>
+                <button type="button" class="nr-btn-icon" title="Add to channel"><i class="fas fa-plus"></i></button>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+
+    <div class="nr-channels">
+        {{#each channels}}
+        <div class="nr-channel" data-channel-id="{{this.id}}">
+            <div class="nr-channel-header">
+                <div class="nr-channel-name">
+                    <i class="{{this.icon}}"></i>
+                    <span>{{this.label}}</span>
+                </div>
+                <div class="nr-channel-track">
+                    <span class="nr-track-name">{{this.trackName}}</span>
+                    <span class="nr-track-duration">{{this.duration}}</span>
+                </div>
+            </div>
+            <div class="nr-channel-controls">
+                <div class="nr-channel-buttons">
+                    <button type="button" class="nr-btn nr-btn-play {{#if this.playing}}active{{/if}}" data-action="channel-play" data-channel="{{this.id}}" title="Play/Pause">
+                        <i class="fas {{#if this.playing}}fa-pause{{else}}fa-play{{/if}}"></i>
+                    </button>
+                    <button type="button" class="nr-btn" data-action="channel-stop" data-channel="{{this.id}}" title="Stop"><i class="fas fa-stop"></i></button>
+                    <button type="button" class="nr-btn {{#if this.looping}}active{{/if}}" data-action="channel-loop" data-channel="{{this.id}}" title="Loop"><i class="fas fa-repeat"></i></button>
+                    <span class="nr-track-count">{{this.trackCount}} tracks</span>
+                </div>
+                <div class="nr-channel-volume">
+                    <i class="fas fa-volume-up nr-vol-icon"></i>
+                    <input type="range" name="channel-volume" data-channel="{{this.id}}" min="0" max="1" step="0.05" value="{{this.volume}}">
+                    <span class="volume-label" data-channel="{{this.id}}">{{this.volumePct}}%</span>
+                </div>
+                {{#if ../isGM}}
+                <div class="nr-channel-actions">
+                    <button type="button" class="nr-btn-small" data-action="channel-clear" data-channel="{{this.id}}" title="Clear"><i class="fas fa-trash"></i></button>
+                </div>
+                {{/if}}
+            </div>
+            {{#if ../isGM}}
+            <div class="nr-channel-import">
+                <input type="text" id="nr-import-input-{{this.id}}" placeholder="URL or search for {{this.label}}..." autocomplete="off">
+                <button type="button" class="nr-btn-small" data-action="import-url" data-channel="{{this.id}}" title="Import"><i class="fas fa-arrow-right"></i></button>
+                <button type="button" class="nr-btn-small" data-action="import-playlist" data-channel="{{this.id}}" title="Import Playlist"><i class="fas fa-list"></i></button>
+            </div>
+            {{/if}}
+        </div>
+        {{/each}}
+    </div>
+
+    {{#if soundEffects.length}}
+    <div class="nr-soundboard">
+        <div class="nr-soundboard-header">Sound Effects</div>
+        <div class="nr-soundboard-grid">
+            {{#each soundEffects}}
+            <button type="button" class="nr-btn nr-btn-sfx" data-action="sfx-play" data-path="{{this.path}}">
+                <i class="fas fa-music"></i>
+                <span>{{this.name}}</span>
+            </button>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+</div>

@@ -1,0 +1,431 @@
+/* ==========================================================
+    1. ROOT / WINDOW
+    ========================================================== */
+
+#nova-red-live-app.window-app {
+    background: #0a0806 !important;
+    border: 1px solid #332200 !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.95) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 480px !important;
+    min-height: 200px !important;
+    transition: height 0.1s ease-out !important;
+    overflow: hidden !important;
+}
+
+#nova-red-live-app .window-header {
+    flex: 0 0 10px !important;
+    height: 10px !important;
+    min-height: 10px !important;
+    background: #1a1208 !important;
+    border-bottom: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    opacity: 0.5 !important;
+    cursor: grab !important;
+    z-index: 1000;
+    overflow: hidden !important;
+}
+
+#nova-red-live-app .window-header:active {
+    cursor: grabbing !important;
+    background: #1a1208 !important;
+    opacity: 1 !important;
+}
+
+#nova-red-live-app .window-header * { display: none !important; }
+
+#nova-red-live-app .window-content {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    color: #ccbbaa;
+}
+
+/* ==========================================================
+    2. CONTENT LAYOUT
+    ========================================================== */
+
+.nr-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.nr-content::-webkit-scrollbar { width: 4px; background: #111; }
+.nr-content::-webkit-scrollbar-thumb { background: #554433; border-radius: 2px; }
+
+/* ==========================================================
+    3. IMPORT BAR
+    ========================================================== */
+
+.nr-import-bar {
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    background: #120e0a;
+    border-bottom: 1px solid #332200;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.nr-channel-select {
+    background: #1a140e;
+    color: #ccbbaa;
+    border: 1px solid #443322;
+    border-radius: 3px;
+    height: 26px;
+    padding: 0 6px;
+    font-size: 11px;
+    width: 90px;
+}
+
+#nr-import-input {
+    flex: 1;
+    background: #1a140e;
+    color: #eeddcc;
+    border: 1px solid #443322;
+    border-radius: 3px;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 12px;
+}
+
+#nr-import-input::placeholder { color: #665544; }
+#nr-import-input:focus { border-color: #ffb000; outline: none; }
+
+/* ==========================================================
+    4. SEARCH PANEL
+    ========================================================== */
+
+.nr-search-panel {
+    border-bottom: 1px solid #332200;
+    background: #0d0a08;
+    flex-shrink: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.nr-search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background: #1a140e;
+    font-size: 11px;
+    color: #ffb000;
+    border-bottom: 1px solid #332200;
+}
+
+.nr-search-results {
+    padding: 4px;
+}
+
+.nr-search-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.nr-search-item:hover { background: #1a140e; }
+
+.nr-search-thumb {
+    width: 40px;
+    height: 24px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.nr-search-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.nr-search-title {
+    font-size: 11px;
+    color: #eeddcc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nr-search-meta {
+    font-size: 9px;
+    color: #776655;
+}
+
+/* ==========================================================
+    5. CHANNELS
+    ========================================================== */
+
+.nr-channels {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 4px;
+    overflow-y: auto;
+}
+
+.nr-channel {
+    background: #120e0a;
+    border: 1px solid #221a10;
+    border-radius: 4px;
+    padding: 6px 8px;
+    flex-shrink: 0;
+}
+
+.nr-channel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.nr-channel-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffb000;
+}
+
+.nr-channel-name i { width: 14px; text-align: center; }
+
+.nr-channel-track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #998877;
+    min-width: 0;
+}
+
+.nr-track-name {
+    color: #eeddcc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.nr-track-duration {
+    color: #776655;
+    font-family: monospace;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.nr-channel-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-channel-buttons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.nr-btn {
+    width: 24px;
+    height: 22px;
+    background: transparent;
+    border: 1px solid #332211;
+    border-radius: 3px;
+    color: #887766;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.15s;
+    padding: 0;
+}
+
+.nr-btn:hover {
+    color: #ffb000;
+    border-color: #ffb000;
+    background: rgba(255, 176, 0, 0.05);
+}
+
+.nr-btn.active {
+    color: #ffb000;
+    border-color: #ffb000;
+    background: rgba(255, 176, 0, 0.1);
+}
+
+.nr-btn-play.active {
+    color: #44cc44;
+    border-color: #44cc44;
+}
+
+.nr-track-count {
+    font-size: 9px;
+    color: #554433;
+    margin-left: 6px;
+}
+
+.nr-channel-volume {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    max-width: 180px;
+}
+
+.nr-vol-icon {
+    color: #887766;
+    font-size: 10px;
+    width: 14px;
+    text-align: center;
+}
+
+.nr-channel-volume input[type="range"] {
+    flex: 1;
+    height: 3px;
+    accent-color: #ffb000;
+    cursor: pointer;
+    background: #221a10;
+    border-radius: 2px;
+    margin: 0;
+}
+
+.nr-channel-volume .volume-label {
+    font-size: 9px;
+    color: #776655;
+    font-family: monospace;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.nr-channel-actions {
+    display: flex;
+    gap: 2px;
+}
+
+.nr-btn-small {
+    background: transparent;
+    border: 1px solid #332211;
+    border-radius: 3px;
+    color: #665544;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    padding: 0;
+    transition: all 0.15s;
+}
+
+.nr-btn-small:hover {
+    color: #ff4444;
+    border-color: #ff4444;
+}
+
+.nr-btn-icon {
+    background: transparent;
+    border: none;
+    color: #887766;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 10px;
+}
+
+.nr-btn-icon:hover { color: #ffb000; }
+
+.nr-channel-import {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid #1a140e;
+}
+
+.nr-channel-import input {
+    flex: 1;
+    background: #0d0a08;
+    color: #eeddcc;
+    border: 1px solid #332211;
+    border-radius: 2px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 10px;
+}
+
+.nr-channel-import input::placeholder { color: #554433; }
+.nr-channel-import input:focus { border-color: #ffb000; outline: none; }
+
+/* ==========================================================
+    6. SOUNDBOARD
+    ========================================================== */
+
+.nr-soundboard {
+    border-top: 1px solid #332200;
+    background: #0d0a08;
+    padding: 6px;
+    flex-shrink: 0;
+}
+
+.nr-soundboard-header {
+    font-size: 10px;
+    color: #887766;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nr-soundboard-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.nr-btn-sfx {
+    width: auto;
+    padding: 0 8px;
+    gap: 4px;
+    font-size: 10px;
+    height: 22px;
+}
+
+.nr-btn-sfx:hover {
+    color: #66ccff;
+    border-color: #66ccff;
+}
+
+/* ==========================================================
+    7. MINIMIZED STATE
+    ========================================================== */
+
+#nova-red-live-app.custom-minimized {
+    height: 58px !important;
+    min-height: 58px !important;
+    resize: horizontal !important;
+    opacity: 0.5;
+    transition: opacity 0.5s ease-in-out 0.7s;
+}
+
+#nova-red-live-app.custom-minimized:hover {
+    opacity: 1;
+    transition-delay: 0s;
+}

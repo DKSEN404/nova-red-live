@@ -1,7 +1,8 @@
 {
   "id": "nova-red-live",
   "title": "Nova-Red Live",
-  "version": "0.0.5",
+  "description": "Session audio director for Foundry VTT. 3-channel mixer (Music/Ambience/Effects) using native Foundry audio. Import YouTube streams via Piped API. Scene-linked presets.",
+  "version": "1.0.0",
   "compatibility": {
     "minimum": "12",
     "verified": "12.331"
@@ -20,14 +21,24 @@
     "systems": []
   },
   "esmodules": [
-    "scripts/main.js"
+    "scripts/main.mjs"
   ],
   "styles": [
-    "styles/style.css"
+    "styles/nova-red-live.css"
   ],
-  "socket": true,
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json"
+    }
+  ],
   "url": "https://github.com/DKSEN404/nova-red-live",
   "manifest": "https://github.com/DKSEN404/nova-red-live/releases/latest/download/module.json",
-  "download": "https://github.com/DKSEN404/nova-red-live/releases/latest/download/module.zip",
-  "description": "A compact, synchronized YouTube player for Foundry VTT with playlist support, searching, and presets. Fork of foundry-tube by shrade."
+  "download": "https://github.com/DKSEN404/nova-red-live/releases/latest/download/module.zip"
 }

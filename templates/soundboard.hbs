@@ -1,0 +1,11 @@
+<div class="nr-soundboard-panel">
+    <div class="nr-soundboard-header">Sound Effects</div>
+    <div class="nr-soundboard-grid">
+        {{#each sounds}}
+        <button type="button" class="nr-btn nr-btn-sfx" data-action="sfx-play" data-path="{{this.path}}">
+            <i class="fas fa-music"></i>
+            <span>{{this.name}}</span>
+        </button>
+        {{/each}}
+    </div>
+</div>

@@ -2,20 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.0.5] — 2026-06-03
-
-### Fixed
-- `scripts/main.js`: Crash when removing last playlist item while it's the current track — `currentIndex` stayed out-of-bounds after `splice()`, causing `v.id` to throw TypeError at line 501 (C3 — CRITICAL)
-- `scripts/main.js`: Playlists appearing empty on page reload — `getData()` used a `loaded` flag that prevented reloading from `game.settings` on re-render; removed the guard and always sync from persisted state (P1)
-- `scripts/main.js`: Live Player scene button now uses `window.getComputedStyle()` for robust visibility detection and adds `.catch()` on the `render()` promise
-- `scripts/main.js`: `hideOnStartup` and `autoplayStart` settings now have `onChange` handlers that immediately affect the running app (not just after next reload)
+## [1.0.0] — 2026-06-03
 
 ### Added
-- `scripts/main.js`: Settings migration in `init` hook — checks for old `foundry-tube` namespace data and migrates `tabsState` and `savedPlaylists` to `nova-red-live` if target is empty
-- `scripts/main.js`: Debug logging in `getData()` showing loaded playlist lengths per tab for future diagnostics
+- **Arquitectura modular ES (`scripts/*.mjs`)** — Reemplaza el monolito `scripts/main.js` (973 líneas) con 6 módulos independientes:
+  - `scripts/constants.mjs`: MODULE_ID, 3 CHANNELS (music/ambience/effects), PIPED_INSTANCES (5), SETTINGS
+  - `scripts/YouTubeImporter.mjs`: Cliente REST Piped API con fallback multi-instancia para obtener streams de audio de YouTube
+  - `scripts/ChannelManager.mjs`: Gestión de Playlists nativas de Foundry por canal (CRUD + control de reproducción)
+  - `scripts/AudioDirector.mjs`: Aplicación mixer (Application v12) con 3 canales, búsqueda YouTube, soundboard
+  - `scripts/ScenePresetManager.mjs`: Presets de audio vinculados a escenas (world settings)
+  - `scripts/main.mjs`: Entry point con hooks init/ready, settings, botón de escena, API pública
+- **`templates/mixer.hbs`**: Template del mixer con import bar, search panel, 3 canales (play/stop/loop/volume/clear)
+- **`templates/soundboard.hbs`**: Template placeholder para panel de efectos de sonido
+- **`styles/nova-red-live.css`**: Tema Cyberpunk (~280 líneas, 7 secciones, accent `#ffb000`)
+- **`lang/en.json`**, **`lang/es.json`**: i18n con namespace `nova-red-live.`, claves idénticas en ambos idiomas
 
 ### Changed
-- `module.json`: version → `0.0.5`
+- **Integración con Foundry nativa**: Playlists reemplazan sockets custom — Foundry sincroniza automáticamente GM↔Players
+- **Piped API reemplaza scraping YouTube**: URLs directas de stream M4A vía `pipedapi.kavin.rocks` con fallback chain de 5 instancias
+- **3 canales temáticos**: Música (sequential), Ambiente (simultaneous), Efectos (one-shot vía AudioHelper)
+- **`module.json`**: `version` → `1.0.0`, `esmodules` → `scripts/main.mjs`, agregado `languages` array, eliminado flag `"socket": true`
+
+### Removed
+- Dependencia de YouTube IFrame API (`YT.Player`, `onYouTubeIframeAPIReady`)
+- Dependencia de scraping HTML con proxies CORS (`_fetchText`, `_parseYouTubeHtml`)
+- Dependencia de socketlib para sincronización
+- 5 tabs genéricos reemplazados por 3 canales con propósito definido
+- Archivos legacy (aún en disco, no se cargan): `scripts/main.js`, `styles/style.css`, `templates/widget.hbs`, `languages/`
 
 ### Credits
 - Original module: **foundry-tube** by [shrade](https://github.com/shradee)
@@ -102,20 +115,33 @@ All notable changes to this project will be documented in this file.
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
 
-## [0.0.5] — 2026-06-03
-
-### Corregido
-- `scripts/main.js`: Crash al eliminar el último item del playlist mientras es el track actual — `currentIndex` quedaba fuera de rango tras `splice()`, causando TypeError en `v.id` en línea 501 (C3 — CRÍTICO)
-- `scripts/main.js`: Playlists aparecían vacías al recargar página — `getData()` usaba flag `loaded` que impedía recargar desde `game.settings` en re-renders; se eliminó el guard y ahora siempre sincroniza desde estado persistido (P1)
-- `scripts/main.js`: Botón Live Player ahora usa `window.getComputedStyle()` para detección robusta de visibilidad y agrega `.catch()` en la promesa `render()`
-- `scripts/main.js`: Settings `hideOnStartup` y `autoplayStart` ahora tienen handlers `onChange` que afectan la app inmediatamente (no solo tras recargar)
+## [1.0.0] — 2026-06-03
 
 ### Añadido
-- `scripts/main.js`: Migración de settings en hook `init` — verifica datos viejos del namespace `foundry-tube` y migra `tabsState` y `savedPlaylists` a `nova-red-live` si el destino está vacío
-- `scripts/main.js`: Logging de depuración en `getData()` mostrando longitudes de playlist cargadas por tab para diagnóstico futuro
+- **Arquitectura modular ES (`scripts/*.mjs`)** — Reemplaza el monolito `scripts/main.js` (973 líneas) con 6 módulos independientes:
+  - `scripts/constants.mjs`: MODULE_ID, 3 CHANNELS (music/ambience/effects), PIPED_INSTANCES (5), SETTINGS
+  - `scripts/YouTubeImporter.mjs`: Cliente REST Piped API con fallback multi-instancia para obtener streams de audio de YouTube
+  - `scripts/ChannelManager.mjs`: Gestión de Playlists nativas de Foundry por canal (CRUD + control de reproducción)
+  - `scripts/AudioDirector.mjs`: Aplicación mixer (Application v12) con 3 canales, búsqueda YouTube, soundboard
+  - `scripts/ScenePresetManager.mjs`: Presets de audio vinculados a escenas (world settings)
+  - `scripts/main.mjs`: Entry point con hooks init/ready, settings, botón de escena, API pública
+- **`templates/mixer.hbs`**: Template del mixer con import bar, search panel, 3 canales (play/stop/loop/volume/clear)
+- **`templates/soundboard.hbs`**: Template placeholder para panel de efectos de sonido
+- **`styles/nova-red-live.css`**: Tema Cyberpunk (~280 líneas, 7 secciones, accent `#ffb000`)
+- **`lang/en.json`**, **`lang/es.json`**: i18n con namespace `nova-red-live.`, claves idénticas en ambos idiomas
 
 ### Cambiado
-- `module.json`: versión → `0.0.5`
+- **Integración con Foundry nativa**: Playlists reemplazan sockets custom — Foundry sincroniza automáticamente GM↔Players
+- **Piped API reemplaza scraping YouTube**: URLs directas de stream M4A vía `pipedapi.kavin.rocks` con fallback chain de 5 instancias
+- **3 canales temáticos**: Música (sequential), Ambiente (simultaneous), Efectos (one-shot vía AudioHelper)
+- **`module.json`**: `version` → `1.0.0`, `esmodules` → `scripts/main.mjs`, agregado `languages` array, eliminado flag `"socket": true`
+
+### Eliminado
+- Dependencia de YouTube IFrame API (`YT.Player`, `onYouTubeIframeAPIReady`)
+- Dependencia de scraping HTML con proxies CORS (`_fetchText`, `_parseYouTubeHtml`)
+- Dependencia de socketlib para sincronización
+- 5 tabs genéricos reemplazados por 3 canales con propósito definido
+- Archivos legacy (aún en disco, no se cargan): `scripts/main.js`, `styles/style.css`, `templates/widget.hbs`, `languages/`
 
 ### Créditos
 - Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)

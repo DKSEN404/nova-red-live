@@ -1,0 +1,54 @@
+{
+  "nova-red-live": {
+    "title": "Nova-Red Live",
+    "button": "Nova-Red Live",
+    "channelLabels": {
+      "music": "Música",
+      "ambience": "Ambiente",
+      "effects": "Efectos"
+    },
+    "settings": {
+      "channelVolume": {
+        "name": "Volumen por Canal",
+        "hint": "Configuración de volumen por canal"
+      },
+      "scenePresets": {
+        "name": "Presets de Escena",
+        "hint": "Configuraciones de audio vinculadas a escenas"
+      },
+      "enabled": {
+        "name": "Activado",
+        "hint": "Activar el módulo Nova-Red Live"
+      },
+      "hideOnStartup": {
+        "name": "Ocultar al Inicio",
+        "hint": "Ocultar la ventana del mixer al cargar el mundo"
+      }
+    },
+    "import": {
+      "placeholder": "URL de YouTube o búsqueda...",
+      "import": "Importar",
+      "search": "Buscar",
+      "added": "Agregado: {name}",
+      "imported": "Importadas {count} pistas desde la playlist",
+      "notFound": "No se encontró nada para esa URL o búsqueda"
+    },
+    "controls": {
+      "play": "Reproducir",
+      "pause": "Pausa",
+      "stop": "Detener",
+      "loop": "Repetir",
+      "clear": "Limpiar",
+      "tracks": "{count} pistas",
+      "noTrack": "---"
+    },
+    "search": {
+      "title": "Buscar: {query}",
+      "close": "Cerrar",
+      "add": "Agregar al canal"
+    },
+    "soundboard": {
+      "title": "Efectos de Sonido"
+    }
+  }
+}
