@@ -38,11 +38,14 @@ while ($listener.IsListening) {
       $targetUrl = [Uri]::UnescapeDataString($matches[1])
       Write-Host "[nr-proxy] Fetching $targetUrl"
       $response = $httpClient.GetAsync($targetUrl).Result
+      if ($null -eq $response) { throw "HttpClient.GetAsync returned null for $targetUrl" }
+      if ($null -eq $response.Content) { $response.Dispose(); throw "Response.Content is null for $targetUrl" }
       $responseBody = $response.Content.ReadAsStringAsync().Result
       $buf = [Text.Encoding]::UTF8.GetBytes($responseBody)
       $res.ContentType = "application/json"
       $res.OutputStream.Write($buf, 0, $buf.Length)
       $res.StatusCode = [int]$response.StatusCode
+      $response.Dispose()
     } else {
       $body = '{"error":"Not found"}'
       $buf = [Text.Encoding]::UTF8.GetBytes($body)

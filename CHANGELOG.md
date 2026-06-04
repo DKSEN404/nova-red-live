@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.8] — 2026-06-03
+
+### Changed
+- **`proxy/nr-proxy.ps1`**: Added null checks for `$response` and `$response.Content` after `GetAsync()` to prevent "Cannot call a method on a null expression" when Piped instances fail SSL/TLS handshake. Added `$response.Dispose()` for proper resource cleanup.
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.7] — 2026-06-03
 
 ### Changed
@@ -214,6 +222,14 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.8] — 2026-06-03
+
+### Cambiado
+- **`proxy/nr-proxy.ps1`**: Agregadas validaciones null para `$response` y `$response.Content` después de `GetAsync()` para prevenir "Cannot call a method on a null expression" cuando instancias Piped fallan en handshake SSL/TLS. Agregado `$response.Dispose()` para limpieza correcta de recursos.
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.7] — 2026-06-03
 
