@@ -155,7 +155,15 @@ export class AudioDirector extends Application {
     }
     const result = await YouTubeImporter.importFromUrl(val);
     if (!result) {
-      try { ui.notifications.warn(game.i18n.localize('nova-red-live.import.notFound') || 'Could not find anything for that URL/query'); } catch (e) { console.warn(`${MODULE_ID} |`, e); }
+      let msg;
+      if (YouTubeImporter.lastError === 'no_audio_streams') {
+        msg = game.i18n.localize('nova-red-live.import.noAudioStreams');
+      } else if (YouTubeImporter.lastError === 'all_tiers_exhausted') {
+        msg = game.i18n.localize('nova-red-live.import.pipedUnavailable');
+      } else {
+        msg = game.i18n.localize('nova-red-live.import.notFound');
+      }
+      try { ui.notifications.warn(msg); } catch (e) { console.warn(`${MODULE_ID} |`, e); }
       return;
     }
 

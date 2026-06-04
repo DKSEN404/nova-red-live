@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.10] — 2026-06-04
+
+### Added
+- **`scripts/YouTubeImporter.mjs`**: Stream cache with 5-minute TTL (`Map<videoId, {data, timestamp}>`) to avoid redundant Piped API calls when re-importing the same video.
+- **`lang/en.json`**, **`lang/es.json`**: New i18n keys `import.noAudioStreams` and `import.pipedUnavailable` for differentiated error messages.
+
+### Changed
+- **`scripts/YouTubeImporter.mjs`**: `getStreamInfo()` no longer blindly selects `audioStreams[0]`. Now filters by MIME type (prefers `audio/mp4` or `audio/webm`), sorts by quality/bitrate (descending), and falls back to the first stream if no match. If `audioStreams` is empty/missing, attempts a `videoStreams` fallback for entries with audio. This reduces false "not found" errors when Piped returns 200 but the first stream is incompatible or missing.
+- **`scripts/YouTubeImporter.mjs`**: `duration` now falls back to `data.videoDuration` if `data.duration` is falsy, preventing `0` from being displayed when duration data is available at a different field.
+- **`scripts/YouTubeImporter.mjs`**: All `fetch()` calls in `fetchFromPiped()` wrapped in `fetchWithTimeout()` (10s `AbortController` timeout) to prevent an unresponsive instance from blocking the entire fallback chain.
+- **`scripts/YouTubeImporter.mjs`**: Added static `lastError` property to track failure reason (`'all_tiers_exhausted'` vs `'no_audio_streams'`), used by `AudioDirector` to show differentiated notification messages.
+- **`scripts/constants.mjs`**: Removed duplicate `pipedapi.lunar.icu` entry (was listed twice in `PIPED_INSTANCES`).
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` now reads `YouTubeImporter.lastError` to show specific notifications: "This video has no available audio streams" vs "Piped API instances are unavailable" vs the generic not-found message.
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.9] — 2026-06-03
 
 ### Changed
@@ -222,6 +239,23 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.10] — 2026-06-04
+
+### Añadido
+- **`scripts/YouTubeImporter.mjs`**: Caché de streams con TTL de 5 minutos (`Map<videoId, {data, timestamp}>`) para evitar llamadas redundantes a la API de Piped al re-importar el mismo video.
+- **`lang/en.json`**, **`lang/es.json`**: Nuevas claves i18n `import.noAudioStreams` e `import.pipedUnavailable` para mensajes de error diferenciados.
+
+### Cambiado
+- **`scripts/YouTubeImporter.mjs`**: `getStreamInfo()` ya no selecciona ciegamente `audioStreams[0]`. Ahora filtra por tipo MIME (prefiere `audio/mp4` o `audio/webm`), ordena por calidad/bitrate (descendente), y cae al primer stream si no hay coincidencia. Si `audioStreams` está vacío/ausente, intenta un fallback a `videoStreams` con entradas que tengan audio. Esto reduce los falsos "no encontrado" cuando Piped responde 200 pero el primer stream es incompatible o falta.
+- **`scripts/YouTubeImporter.mjs`**: `duration` ahora usa `data.videoDuration` como fallback si `data.duration` es falsy, evitando mostrar `0` cuando la duración está disponible en otro campo.
+- **`scripts/YouTubeImporter.mjs`**: Todas las llamadas `fetch()` en `fetchFromPiped()` envueltas en `fetchWithTimeout()` (timeout de 10s via `AbortController`) para evitar que una instancia que no responda bloquee toda la cadena de fallback.
+- **`scripts/YouTubeImporter.mjs`**: Añadida propiedad estática `lastError` para registrar la razón del fallo (`'all_tiers_exhausted'` vs `'no_audio_streams'`), usada por `AudioDirector` para mostrar notificaciones diferenciadas.
+- **`scripts/constants.mjs`**: Eliminada entrada duplicada `pipedapi.lunar.icu` (aparecía dos veces en `PIPED_INSTANCES`).
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` ahora lee `YouTubeImporter.lastError` para mostrar notificaciones específicas: "Este video no tiene streams de audio disponibles" vs "Las instancias de Piped API no están disponibles" vs el mensaje genérico de no encontrado.
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.9] — 2026-06-03
 

@@ -38,7 +38,6 @@ export const PIPED_INSTANCES = [
   'https://pipedapi.ducks.party',
   'https://pipedapi.projectsegfau.lt',
   'https://pipedapi.privacy.com.de',
-  'https://pipedapi.lunar.icu',
   'https://pipedapi.r4fo.com',
   'https://pipedapi.private.coffee'
 ];
