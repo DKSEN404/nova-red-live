@@ -2,15 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.8] — 2026-06-03
+## [1.0.9] — 2026-06-03
 
 ### Changed
-- **`proxy/nr-proxy.ps1`**: Added null checks for `$response` and `$response.Content` after `GetAsync()` to prevent "Cannot call a method on a null expression" when Piped instances fail SSL/TLS handshake. Added `$response.Dispose()` for proper resource cleanup.
+- **`proxy/nr-proxy.ps1`**: Reverted from `System.Net.Http.HttpClient` back to `Net.WebClient` with `WebException` status code capture. `HttpClient` was unreliable in PowerShell 5.1 — returned `$null` on SSL/TLS handshake failures, required `Add-Type -AssemblyName`, and caused deadlock risks with `.Result`. The new approach uses `Net.WebClient` (stable in .NET Framework 4.8) with a nested `try/catch [System.Net.WebException]` that reads the real HTTP status code (`$_.Exception.Response.StatusCode`) and response body from the error stream. No `Add-Type`, no async, no null checks needed. User-Agent stays `nr-proxy/2.0`.
 
 ### Credits
 - Original module: **foundry-tube** by [shrade](https://github.com/shradee)
 
-## [1.0.7] — 2026-06-03
+## [1.0.8] — 2026-06-03
 
 ### Changed
 - **`proxy/nr-proxy.ps1`**: Upgraded HTTP client from `Net.WebClient.DownloadString()` (throws on any non-2xx → all errors become HTTP 500) to `System.Net.Http.HttpClient.GetAsync()` (relays original status code from Piped instances to the module caller). This lets the module see the real HTTP status (e.g. 502 Cloudflare) and skip bad instances faster, without unnecessary retries. User-Agent bumped to `nr-proxy/2.0`.
@@ -222,6 +222,14 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.9] — 2026-06-03
+
+### Cambiado
+- **`proxy/nr-proxy.ps1`**: Revertido de `System.Net.Http.HttpClient` a `Net.WebClient` con captura de código de estado via `WebException`. `HttpClient` era inestable en PowerShell 5.1 — retornaba `$null` en fallos SSL/TLS, requería `Add-Type -AssemblyName`, y tenía riesgo de deadlock con `.Result`. El nuevo enfoque usa `Net.WebClient` (estable en .NET Framework 4.8) con un `try/catch [System.Net.WebException]` anidado que lee el código de estado HTTP real (`$_.Exception.Response.StatusCode`) y el cuerpo de la respuesta. Sin `Add-Type`, sin async, sin null checks. User-Agent `nr-proxy/2.0`.
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.8] — 2026-06-03
 

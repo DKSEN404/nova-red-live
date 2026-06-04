@@ -8,10 +8,6 @@ Write-Host "[nr-proxy] Press Ctrl+C to stop."
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
 
-Add-Type -AssemblyName System.Net.Http
-$httpClient = New-Object System.Net.Http.HttpClient
-$httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("nr-proxy/2.0")
-
 while ($listener.IsListening) {
   $ctx = $listener.GetContext()
   $req = $ctx.Request
@@ -37,15 +33,23 @@ while ($listener.IsListening) {
     } elseif ($req.RawUrl -match "^/fetch\?url=(.+)") {
       $targetUrl = [Uri]::UnescapeDataString($matches[1])
       Write-Host "[nr-proxy] Fetching $targetUrl"
-      $response = $httpClient.GetAsync($targetUrl).Result
-      if ($null -eq $response) { throw "HttpClient.GetAsync returned null for $targetUrl" }
-      if ($null -eq $response.Content) { $response.Dispose(); throw "Response.Content is null for $targetUrl" }
-      $responseBody = $response.Content.ReadAsStringAsync().Result
+      $wc = New-Object Net.WebClient
+      $wc.Headers.Add("User-Agent", "nr-proxy/2.0")
+      try {
+        $responseBody = $wc.DownloadString($targetUrl)
+        $res.StatusCode = 200
+      } catch [System.Net.WebException] {
+        $httpRes = $_.Exception.Response
+        if ($httpRes) {
+          $res.StatusCode = [int]$httpRes.StatusCode
+          $reader = New-Object System.IO.StreamReader($httpRes.GetResponseStream())
+          $responseBody = $reader.ReadToEnd()
+          $reader.Dispose()
+        } else { throw }
+      }
       $buf = [Text.Encoding]::UTF8.GetBytes($responseBody)
       $res.ContentType = "application/json"
       $res.OutputStream.Write($buf, 0, $buf.Length)
-      $res.StatusCode = [int]$response.StatusCode
-      $response.Dispose()
     } else {
       $body = '{"error":"Not found"}'
       $buf = [Text.Encoding]::UTF8.GetBytes($body)
@@ -67,6 +71,5 @@ while ($listener.IsListening) {
   try { $res.Close() } catch {}
 }
 
-$httpClient.Dispose()
 $listener.Stop()
 Write-Host "[nr-proxy] Stopped."
