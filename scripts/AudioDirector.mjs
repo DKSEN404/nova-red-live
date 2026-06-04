@@ -155,10 +155,13 @@ export class AudioDirector extends Application {
     }
     const result = await YouTubeImporter.importFromUrl(val);
     if (!result) {
+      const err = YouTubeImporter.lastError;
       let msg;
-      if (YouTubeImporter.lastError === 'no_audio_streams') {
+      if (err?.startsWith('no_audio_streams')) {
         msg = game.i18n.localize('nova-red-live.import.noAudioStreams');
-      } else if (YouTubeImporter.lastError === 'all_tiers_exhausted') {
+        const detail = err.includes('(') ? err.substring(err.indexOf('(')) : '';
+        if (detail) msg += ` ${detail}`;
+      } else if (err === 'all_tiers_exhausted') {
         msg = game.i18n.localize('nova-red-live.import.pipedUnavailable');
       } else {
         msg = game.i18n.localize('nova-red-live.import.notFound');

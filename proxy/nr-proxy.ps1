@@ -35,6 +35,7 @@ while ($listener.IsListening) {
       Write-Host "[nr-proxy] Fetching $targetUrl"
       $wc = New-Object Net.WebClient
       $wc.Headers.Add("User-Agent", "nr-proxy/2.0")
+      $res.Headers.Add("X-NR-Proxy-Version", "2.1")
       try {
         $responseBody = $wc.DownloadString($targetUrl)
         $res.StatusCode = 200
@@ -62,9 +63,9 @@ while ($listener.IsListening) {
     try {
       $body = '{"error":"' + $_.Exception.Message.Replace('"', "'") + '"}'
       $buf = [Text.Encoding]::UTF8.GetBytes($body)
+      $res.StatusCode = 502
       $res.ContentType = "application/json"
       $res.OutputStream.Write($buf, 0, $buf.Length)
-      $res.StatusCode = 500
     } catch {}
   }
 

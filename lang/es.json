@@ -32,7 +32,7 @@
       "added": "Agregado: {name}",
       "imported": "Importadas {count} pistas desde la playlist",
       "notFound": "No se encontró nada para esa URL o búsqueda",
-      "noAudioStreams": "Este video no tiene streams de audio disponibles",
+      "noAudioStreams": "No hay streams de audio disponibles para este video",
       "pipedUnavailable": "Las instancias de Piped API no están disponibles. Verifica tu proxy o conexión a internet",
       "proxyNotRunning": "Proxy de importación de YouTube no detectado. Ejecuta nr-proxy.bat desde la carpeta del módulo e intenta de nuevo."
     },

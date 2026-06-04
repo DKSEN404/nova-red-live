@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] — 2026-06-04
+
+### Added
+- **`scripts/YouTubeImporter.mjs`**: Diagnostic logging in `getStreamInfo()` — logs `Object.keys(data)`, `audioStreams.length`, `videoStreams.length`, and first stream sample to console. Helps debug Piped response structure without remote server access.
+- **`proxy/nr-proxy.ps1`**: `X-NR-Proxy-Version: 2.1` header on responses for version identification.
+
+### Changed
+- **`scripts/constants.mjs`**: **Replaced 15 dead Piped instances** with 7 curated entries. Top priority: `api.piped.private.coffee` (the only instance confirmed working via `piped-instances.kavin.rocks` registry). Removed: `pipedapi.oxy.wiki`, `pipedapi.us.owo.codes`, `pipedapi.namazso.eu`, `pipedapi.smnzt.moe`, `pipedapi.frontendfriendly.xyz`, `pipedapi.pfcd.me`, `pipedapi.projectsegfau.lt`, `pipedapi.privacy.com.de`, `pipedapi.r4fo.com`, `pipedapi.private.coffee`. Added: `api.piped.private.coffee`, `pipedapi-libre.kavin.rocks`.
+- **`scripts/YouTubeImporter.mjs`**: `fetchFromPiped()` now detects `data.error` in Piped responses and skips the failed instance. Also validates response is a plain object (not array/HTML). This prevents `{"error":"DNS failure"}` JSON responses from being treated as valid stream data. Tier 1 (proxy) now properly skips instances whose requests failed at the network level.
+- **`scripts/YouTubeImporter.mjs`**: `getStreamInfo()` `videoStreams` fallback now checks `videoOnly: false` first, then falls back to any non-videoOnly stream regardless of MIME type. This handles Piped instances returning LBRY/Odysee streams (e.g. `video/mp4` with `videoOnly: false`).
+- **`scripts/YouTubeImporter.mjs`**: MIME filter relaxed — if `mp4`/`webm` filtering yields nothing, `audioStreams` with any MIME type and a valid `url` are accepted.
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` error messages now include diagnostic detail (e.g. `(video fallback empty)`, `(all streams missing url)`) appended to the localized notification.
+- **`proxy/nr-proxy.ps1`**: Fixed `StatusCode` being set after `OutputStream.Write()` in the error catch block, which caused all network-level errors (DNS failure, SSL/TLS errors) to be returned as HTTP 200 instead of 502. Status code is now set before writing the response body.
+- **`lang/en.json`**: Updated `import.noAudioStreams` message for clarity.
+- **`lang/es.json`**: Updated `import.noAudioStreams` message for clarity.
+
+### Fixed
+- **Root cause of "no audio streams" error**: The module's `fetchFromPiped()` iterated through 15 dead Piped instances. All returned error JSON (DNS failures, SSL errors, Cloudflare blocks) wrapped in HTTP 200 by the proxy. The module treated any truthy `data` as success → found no `audioStreams` → returned `null` with `lastError = 'no_audio_streams'`. Fixed by adding `data.error` detection and replacing instance list with confirmed-working entries.
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.10] — 2026-06-04
 
 ### Added
@@ -239,6 +261,28 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.1.0] — 2026-06-04
+
+### Añadido
+- **`scripts/YouTubeImporter.mjs`**: Logging de diagnóstico en `getStreamInfo()` — registra `Object.keys(data)`, `audioStreams.length`, `videoStreams.length`, y una muestra del primer stream en consola. Ayuda a depurar la estructura de respuesta de Piped sin acceso remoto al servidor.
+- **`proxy/nr-proxy.ps1`**: Cabecera `X-NR-Proxy-Version: 2.1` en las respuestas para identificación de versión.
+
+### Cambiado
+- **`scripts/constants.mjs`**: **Reemplazadas 15 instancias Piped caídas** por 7 entradas seleccionadas. Prioridad principal: `api.piped.private.coffee` (la única instancia confirmada funcional via registro `piped-instances.kavin.rocks`). Eliminadas: `pipedapi.oxy.wiki`, `pipedapi.us.owo.codes`, `pipedapi.namazso.eu`, `pipedapi.smnzt.moe`, `pipedapi.frontendfriendly.xyz`, `pipedapi.pfcd.me`, `pipedapi.projectsegfau.lt`, `pipedapi.privacy.com.de`, `pipedapi.r4fo.com`, `pipedapi.private.coffee`. Añadidas: `api.piped.private.coffee`, `pipedapi-libre.kavin.rocks`.
+- **`scripts/YouTubeImporter.mjs`**: `fetchFromPiped()` ahora detecta `data.error` en respuestas de Piped y salta la instancia fallida. También valida que la respuesta sea un objeto plano (no array/HTML). Esto evita que respuestas JSON con `{"error":"fallo DNS"}` sean tratadas como datos de stream válidos. Tier 1 (proxy) ahora salta correctamente instancias cuyas peticiones fallan a nivel de red.
+- **`scripts/YouTubeImporter.mjs`**: El fallback `videoStreams` de `getStreamInfo()` ahora busca streams con `videoOnly: false` primero, y luego cualquier stream no-videoOnly sin importar el tipo MIME. Esto maneja instancias Piped que devuelven streams LBRY/Odysee (ej. `video/mp4` con `videoOnly: false`).
+- **`scripts/YouTubeImporter.mjs`**: Filtro MIME relajado — si el filtro `mp4`/`webm` no encuentra nada, se aceptan `audioStreams` de cualquier tipo MIME que tengan una `url` válida.
+- **`scripts/AudioDirector.mjs`**: Los mensajes de error de `_handleImport()` ahora incluyen detalle diagnóstico (ej. `(video fallback empty)`, `(all streams missing url)`) adjunto a la notificación localizada.
+- **`proxy/nr-proxy.ps1`**: Corregido `StatusCode` establecido después de `OutputStream.Write()` en el bloque catch de errores, lo que causaba que todos los errores de red (fallo DNS, errores SSL/TLS) se devolvieran como HTTP 200 en lugar de 502. El código de estado ahora se establece antes de escribir el cuerpo de la respuesta.
+- **`lang/en.json`**: Actualizado mensaje `import.noAudioStreams` para mayor claridad.
+- **`lang/es.json`**: Actualizado mensaje `import.noAudioStreams` para mayor claridad.
+
+### Corregido
+- **Causa raíz del error "no hay streams de audio"**: `fetchFromPiped()` iteraba a través de 15 instancias Piped caídas. Todas devolvían JSON de error (fallos DNS, errores SSL, bloqueos Cloudflare) envueltos en HTTP 200 por el proxy. El módulo trataba cualquier `data` truthy como éxito → no encontraba `audioStreams` → retornaba `null` con `lastError = 'no_audio_streams'`. Corregido añadiendo detección de `data.error` y reemplazando la lista de instancias con entradas confirmadas funcionales.
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.10] — 2026-06-04
 

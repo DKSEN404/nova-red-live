@@ -48,6 +48,8 @@ export class YouTubeImporter {
         const res = await fetchWithTimeout(`${LOCAL_PROXY}/fetch?url=${encodeURIComponent(`${instance}${endpoint}`)}`);
         if (!res.ok) { console.warn(`${MODULE_ID} | Tier 1 HTTP ${res.status} for ${instance}`); continue; }
         const data = await res.json();
+        if (data?.error) { console.warn(`${MODULE_ID} | Tier 1 error from ${instance}: ${data.error}`); continue; }
+        if (typeof data !== 'object' || Array.isArray(data)) { console.warn(`${MODULE_ID} | Tier 1 unexpected response type from ${instance}`); continue; }
         console.log(`${MODULE_ID} | Tier 1 (local proxy) OK via ${instance}`);
         return data;
       } catch (e) {
@@ -61,6 +63,8 @@ export class YouTubeImporter {
         const res = await fetchWithTimeout(url);
         if (!res.ok) continue;
         const data = await res.json();
+        if (data?.error) { console.warn(`${MODULE_ID} | Tier 2 error from ${instance}: ${data.error}`); continue; }
+        if (typeof data !== 'object' || Array.isArray(data)) { console.warn(`${MODULE_ID} | Tier 2 unexpected response type from ${instance}`); continue; }
         console.log(`${MODULE_ID} | Tier 2 (direct) OK via ${instance}`);
         return data;
       } catch (e) {
@@ -83,6 +87,8 @@ export class YouTubeImporter {
           } else {
             data = await res.json();
           }
+          if (data?.error) { console.warn(`${MODULE_ID} | Tier 3 error from ${proxy.type}/${instance}: ${data.error}`); continue; }
+          if (typeof data !== 'object' || Array.isArray(data)) { console.warn(`${MODULE_ID} | Tier 3 unexpected response type from ${proxy.type}/${instance}`); continue; }
           console.log(`${MODULE_ID} | Tier 3 OK via ${proxy.type} -> ${instance}`);
           return data;
         } catch (e) {
@@ -91,7 +97,7 @@ export class YouTubeImporter {
       }
     }
     this.lastError = 'all_tiers_exhausted';
-    console.error(`${MODULE_ID} | All 3 tiers exhausted — returning null`);
+    console.error(`${MODULE_ID} | All 3 tiers exhausted — none returned valid JSON`);
     return null;
   }
 
@@ -121,10 +127,22 @@ export class YouTubeImporter {
     const data = await this.fetchFromPiped(`/streams/${videoId}`);
     if (!data) return null;
 
+    console.log(`${MODULE_ID} | getStreamInfo raw data keys:`, Object.keys(data || {}).join(', '));
+    console.log(`${MODULE_ID} | getStreamInfo audioStreams:`, data?.audioStreams?.length ?? 'missing');
+    console.log(`${MODULE_ID} | getStreamInfo videoStreams:`, data?.videoStreams?.length ?? 'missing');
+    if (data?.audioStreams?.[0]) {
+      console.log(`${MODULE_ID} | first audioStream sample:`, JSON.stringify(data.audioStreams[0]).substring(0, 300));
+    }
+    if (data?.videoStreams?.[0]) {
+      console.log(`${MODULE_ID} | first videoStream sample:`, JSON.stringify(data.videoStreams[0]).substring(0, 300));
+    }
+
     let audioStreams = data.audioStreams;
     if (!audioStreams || audioStreams.length === 0) {
       const videoStream = data.videoStreams?.find(s =>
-        s?.url && (s.mimeType?.includes('mp4') || s.mimeType?.includes('webm'))
+        s?.url && !s.videoOnly && (s.mimeType?.includes('mp4') || s.mimeType?.includes('webm'))
+      ) || data.videoStreams?.find(s =>
+        s?.url && !s.videoOnly
       );
       if (videoStream?.url) {
         const result = {
@@ -140,11 +158,11 @@ export class YouTubeImporter {
         setCache(videoId, result);
         return result;
       }
-      this.lastError = 'no_audio_streams';
+      this.lastError = 'no_audio_streams (video fallback empty)';
       return null;
     }
 
-    const preferred = audioStreams
+    const mimeFiltered = audioStreams
       .filter(s => s?.url && (s.mimeType?.includes('mp4') || s.mimeType?.includes('webm')))
       .sort((a, b) => {
         const qA = parseInt(a.quality) || 0;
@@ -152,9 +170,10 @@ export class YouTubeImporter {
         return qB - qA;
       });
 
-    const audio = preferred[0] || audioStreams[0];
+    const audio = mimeFiltered[0] || audioStreams.find(s => s?.url);
     if (!audio?.url) {
-      this.lastError = 'no_audio_streams';
+      console.warn(`${MODULE_ID} | No audio stream with url found in ${audioStreams.length} streams`);
+      this.lastError = 'no_audio_streams (all streams missing url)';
       return null;
     }
 

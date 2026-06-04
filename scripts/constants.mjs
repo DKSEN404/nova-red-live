@@ -25,21 +25,13 @@ export const CHANNELS = {
 };
 
 export const PIPED_INSTANCES = [
+  'https://api.piped.private.coffee',
   'https://pipedapi.kavin.rocks',
+  'https://pipedapi-libre.kavin.rocks',
   'https://pipedapi.leptons.xyz',
   'https://piped-api.lunar.icu',
   'https://pipedapi.adminforge.de',
-  'https://pipedapi.oxy.wiki',
-  'https://pipedapi.us.owo.codes',
-  'https://pipedapi.namazso.eu',
-  'https://pipedapi.smnzt.moe',
-  'https://pipedapi.frontendfriendly.xyz',
-  'https://pipedapi.pfcd.me',
-  'https://pipedapi.ducks.party',
-  'https://pipedapi.projectsegfau.lt',
-  'https://pipedapi.privacy.com.de',
-  'https://pipedapi.r4fo.com',
-  'https://pipedapi.private.coffee'
+  'https://pipedapi.ducks.party'
 ];
 
 export const SETTINGS = {

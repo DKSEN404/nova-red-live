@@ -1,6 +1,6 @@
 # Nova-Red Live
 
-![Versión](https://img.shields.io/badge/version-0.0.1-ffb000?style=flat-square)
+![Versión](https://img.shields.io/badge/version-1.1.0-ffb000?style=flat-square)
 
 > Reproductor de YouTube compacto y sincronizado para Foundry VTT con soporte de playlists, búsqueda y presets.
 > Fork de [foundry-tube](https://github.com/shradee/foundry-tube) por [shrade](https://github.com/shradee).
