@@ -10,7 +10,7 @@ export class ChannelManager {
   }
 
   _playlistName(channelId) {
-    return `${PLAYLIST_PREFIX} ${CHANNELS[channelId].label}`;
+    return `${PLAYLIST_PREFIX} ${game.i18n.localize(CHANNELS[channelId].label)}`;
   }
 
   async init() {

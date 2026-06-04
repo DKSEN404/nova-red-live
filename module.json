@@ -3,7 +3,7 @@
   "socket": true,
   "title": "Nova-Red Live",
   "description": "Session audio director for Foundry VTT. 3-channel mixer (Music/Ambience/Effects) using native Foundry audio. Import YouTube streams via Piped API. Scene-linked presets.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "compatibility": {
     "minimum": "12",
     "verified": "12.331"

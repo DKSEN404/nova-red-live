@@ -31,7 +31,12 @@ export class PipedProxy {
   }
 
   static async _handleRequest(data) {
-    if (typeof window !== 'undefined') return;
+    const isServer = typeof document === 'undefined' && (
+      typeof window === 'undefined' ||
+      (typeof process !== 'undefined' && process.release?.name === 'node')
+    );
+    console.log(`${MODULE_ID} | PipedProxy _handleRequest REACHED requestId=${data.requestId} isServer=${isServer}`);
+    if (!isServer) return;
     const { requestId, url } = data;
     console.log(`${MODULE_ID} | PipedProxy SERVER processing requestId=${requestId} url=${url}`);
     try {

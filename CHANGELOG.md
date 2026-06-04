@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] — 2026-06-03
+
+### Fixed
+- **`scripts/ChannelManager.mjs`**: Playlist names were showing raw i18n keys (e.g. `"Nova-Red nova-red-live.channelLabels.music"`) instead of localized display names (e.g. `"Nova-Red Música"`). Root cause: `_playlistName()` used `CHANNELS[channelId].label` directly instead of wrapping it in `game.i18n.localize()`. Other UI code (e.g. `AudioDirector.mjs:38`) already used `game.i18n.localize()` correctly — only `ChannelManager` missed it.
+- **`scripts/PipedProxy.mjs`**: Socket proxy server still not processing requests after v1.0.4 fix. Root cause: the `typeof window !== 'undefined'` guard in `_handleRequest()` was intended to block browser clients and only process on the Node.js server. However, Foundry v12.331 polyfills `window` as an empty object on the Node.js server, causing the guard to evaluate `true` on both client and server — so the server always returned early without fetching. Fixed by replacing the single `typeof window` check with a multilayered server detection: `typeof document === 'undefined'` (more reliable — Foundry does not polyfill `document`) combined with `typeof window === 'undefined'` or `process.release?.name === 'node'` as confirmatory checks. Also added a `console.log` with `isServer` flag **before** the guard so server console will confirm whether the event reaches `_handleRequest` at all.
+
+### Changed
+- **`module.json`**: version → `1.0.5`
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.4] — 2026-06-03
 
 ### Fixed
@@ -178,6 +190,30 @@ All notable changes to this project will be documented in this file.
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
 
+## [1.0.5] — 2026-06-03
+
+### Corregido
+- **`scripts/ChannelManager.mjs`**: Los nombres de las playlists mostraban las claves i18n sin traducir (ej. `"Nova-Red nova-red-live.channelLabels.music"`) en lugar de los nombres localizados (ej. `"Nova-Red Música"`). Causa raíz: `_playlistName()` usaba `CHANNELS[channelId].label` directamente sin pasarlo por `game.i18n.localize()`. El resto del código de UI (ej. `AudioDirector.mjs:38`) ya usaba `game.i18n.localize()` correctamente — solo faltaba en `ChannelManager`.
+- **`scripts/PipedProxy.mjs`**: El proxy por socket seguía sin procesar peticiones tras la corrección de v1.0.4. Causa raíz: la guardia `typeof window !== 'undefined'` en `_handleRequest()` pretendía bloquear clientes navegador y solo procesar en el servidor Node.js. Sin embargo, Foundry v12.331 polyfillea `window` como objeto vacío en el servidor Node.js, haciendo que la guardia devolviera `true` tanto en cliente como en servidor — así el servidor siempre salía sin hacer el fetch. Corregido reemplazando el único chequeo `typeof window` con detección multicapa: `typeof document === 'undefined'` (más fiable — Foundry no polyfillea `document`) combinado con `typeof window === 'undefined'` o `process.release?.name === 'node'` como chequeos confirmatorios. También se añadió un `console.log` con el flag `isServer` **antes** de la guardia para que la consola del servidor confirme si el evento llega a `_handleRequest`.
+
+### Cambiado
+- **`module.json`**: versión → `1.0.5`
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
+
+## [1.0.4] — 2026-06-03
+
+### Corregido
+- **`scripts/PipedProxy.mjs`**: El proxy por socket no funcionaba en Foundry v12.331. Causa raíz: Foundry v12 usa el **nombre completo del evento** como clave de enrutamiento. Al usar dos sub-eventos (`module.nova-red-live.piped-proxy` y `module.nova-red-live.piped-proxy-response`), los handlers `game.socket.on()` del servidor nunca se disparaban porque el enrutamiento por nombre de evento no coincidía. Corregido cambiando a un **solo nombre de evento** (`module.nova-red-live`) con campo `data.action` (`'proxy-req'` / `'proxy-res'`) para distinguir solicitud de respuesta — siguiendo la convención de otros módulos de Foundry v12 (ej. Preload Tracker usa `module.preload-tracker`). También se envolvió `game.socket.emit` en try/catch para que los fallos rechacen la promesa inmediatamente. Se añadió logging completo en init, emit y procesamiento server-side para depuración futura.
+- **`scripts/AudioDirector.mjs`**: Llamadas a notificación en `_handleImport()` envueltas en try/catch para evitar que el crash del hook `queuedNotification` de `mobile-improvements` (v1.3.3) (`Cannot read properties of undefined (reading 'replace')`) se propague como error no manejado.
+
+### Cambiado
+- **`scripts/constants.mjs`**: Añadidas dos instancias Piped adicionales (`pipedapi.us.owo.codes` y `pipedapi.namazso.eu`) para mejorar fiabilidad cuando varias instancias están caídas.
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
+
 ## [1.0.3] — 2026-06-03
 
 ### Añadido
@@ -187,9 +223,9 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 
 ### Cambiado
 - **`scripts/YouTubeImporter.mjs`**: `fetchFromPiped()` ahora tiene 3 niveles de fallback:
-  1. **Socket proxy** (server-side, sin CORS) — nuevo Tier 1
-  2. **Llamada directa Piped** (puede funcionar en cliente desktop Electron)
-  3. **Proxies CORS** (allorigins, corsproxy.io) — eliminados `codetabs` y `cors.sh` (no confiables)
+   1. **Socket proxy** (server-side, sin CORS) — nuevo Tier 1
+   2. **Llamada directa Piped** (puede funcionar en cliente desktop Electron)
+   3. **Proxies CORS** (allorigins, corsproxy.io) — eliminados `codetabs` y `cors.sh` (no confiables)
 - **`scripts/constants.mjs`**: Reemplazadas instancias Piped caídas `silentx.me` (DNS) y `qdi.ax` (DNS) por `pipedapi.adminforge.de` y `pipedapi.oxy.wiki`
 
 ### Créditos
