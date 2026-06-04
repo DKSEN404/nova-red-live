@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.6] — 2026-06-03
+
+### Changed
+- **Architectural**: Replaced socket proxy (`PipedProxy.mjs`) with a local PowerShell HTTP sidecar (`proxy/nr-proxy.ps1`). Foundry v12 module code runs client-side only — `game.socket.on` handlers NEVER execute on the Node.js server. After three releases (v1.0.3 through v1.0.5) attempting various detection patterns (sub-events, single event with action, multilayer server detection), the fundamental architecture limitation was confirmed: the server is a pure socket.io relay and never runs module socket handlers. The socket proxy approach is impossible in Foundry v12.
+- **`scripts/PipedProxy.mjs`**: **REMOVED** — entire file deleted. No longer viable.
+- **`scripts/YouTubeImporter.mjs`**: Tier 1 now uses `http://localhost:23456/fetch?url=...` (local PowerShell proxy). Health check (`/health`) before iterating instances. Tier 2 (direct fetch) and Tier 3 (CORS proxies) preserved as fallbacks.
+- **`scripts/main.mjs`**: Removed `import { PipedProxy }` and `PipedProxy.init()` call.
+- **`scripts/constants.mjs`**: Expanded `PIPED_INSTANCES` from 7 to 16 instances (added smnzt.moe, frontendfriendly.xyz, pfcd.me, ducks.party, projectsegfau.lt, privacy.com.de, r4fo.com, private.coffee).
+- **`module.json`**: Removed `"socket": true` flag, version → `1.0.6`.
+- **`proxy/nr-proxy.ps1`**: **NEW** — PowerShell HTTP server listening on `localhost:23456`. Endpoints: `GET /health` → `{"status":"ok"}`, `GET /fetch?url=<encoded>` → relays to target URL with CORS headers. Uses `Tls12/Tls13`, `Access-Control-Allow-Origin: *`.
+- **`proxy/nr-proxy.bat`**: **NEW** — Double-click launcher for the PowerShell proxy.
+- **`lang/en.json`**: Added `"proxyNotRunning"` i18n key.
+- **`lang/es.json`**: Added `"proxyNotRunning"` i18n key.
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.5] — 2026-06-03
 
 ### Fixed
@@ -189,6 +206,22 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.6] — 2026-06-03
+
+### Cambiado
+- **Arquitectura**: Reemplazado el socket proxy (`PipedProxy.mjs`) con un sidecar HTTP local de PowerShell (`proxy/nr-proxy.ps1`). El código de módulo en Foundry v12 se ejecuta solo del lado del cliente — los handlers `game.socket.on` NUNCA se ejecutan en el servidor Node.js. Después de tres releases (v1.0.3 a v1.0.5) intentando varios patrones de detección, se confirmó la limitación arquitectónica fundamental: el servidor es un relay puro de socket.io y nunca ejecuta handlers de socket del módulo. El enfoque de socket proxy es imposible en Foundry v12.
+- **`scripts/PipedProxy.mjs`**: **ELIMINADO** — archivo completo borrado. Ya no es viable.
+- **`scripts/YouTubeImporter.mjs`**: Tier 1 ahora usa `http://localhost:23456/fetch?url=...` (proxy local PowerShell). Health check (`/health`) antes de iterar instancias. Tier 2 (directo) y Tier 3 (proxies CORS) preservados como fallback.
+- **`scripts/main.mjs`**: Eliminados `import { PipedProxy }` y la llamada `PipedProxy.init()`.
+- **`scripts/constants.mjs`**: Expandido `PIPED_INSTANCES` de 7 a 16 instancias.
+- **`module.json`**: Eliminado flag `"socket": true`, versión → `1.0.6`.
+- **`proxy/nr-proxy.ps1`**: **NUEVO** — Servidor HTTP PowerShell en `localhost:23456`. Endpoints: `GET /health` → `{"status":"ok"}`, `GET /fetch?url=<encoded>` → relay a URL destino con cabeceras CORS.
+- **`proxy/nr-proxy.bat`**: **NUEVO** — Lanzador de doble clic para el proxy PowerShell.
+- **`lang/en.json`**, **`lang/es.json`**: Añadida clave `"proxyNotRunning"`.
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.5] — 2026-06-03
 

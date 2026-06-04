@@ -31,7 +31,16 @@ export const PIPED_INSTANCES = [
   'https://pipedapi.adminforge.de',
   'https://pipedapi.oxy.wiki',
   'https://pipedapi.us.owo.codes',
-  'https://pipedapi.namazso.eu'
+  'https://pipedapi.namazso.eu',
+  'https://pipedapi.smnzt.moe',
+  'https://pipedapi.frontendfriendly.xyz',
+  'https://pipedapi.pfcd.me',
+  'https://pipedapi.ducks.party',
+  'https://pipedapi.projectsegfau.lt',
+  'https://pipedapi.privacy.com.de',
+  'https://pipedapi.lunar.icu',
+  'https://pipedapi.r4fo.com',
+  'https://pipedapi.private.coffee'
 ];
 
 export const SETTINGS = {

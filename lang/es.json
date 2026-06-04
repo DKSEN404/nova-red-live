@@ -31,7 +31,8 @@
       "search": "Buscar",
       "added": "Agregado: {name}",
       "imported": "Importadas {count} pistas desde la playlist",
-      "notFound": "No se encontró nada para esa URL o búsqueda"
+      "notFound": "No se encontró nada para esa URL o búsqueda",
+      "proxyNotRunning": "Proxy de importación de YouTube no detectado. Ejecuta nr-proxy.bat desde la carpeta del módulo e intenta de nuevo."
     },
     "controls": {
       "play": "Reproducir",

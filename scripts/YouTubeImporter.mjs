@@ -1,17 +1,27 @@
 import { PIPED_INSTANCES, MODULE_ID } from './constants.mjs';
-import { PipedProxy } from './PipedProxy.mjs';
 
 const CORS_PROXIES = [
   { url: 'https://api.allorigins.win/get?url=', type: 'allorigins' },
   { url: 'https://corsproxy.io/?', type: 'passthrough' }
 ];
 
+const LOCAL_PROXY = 'http://localhost:23456';
+
 export class YouTubeImporter {
   static async fetchFromPiped(endpoint) {
     for (const instance of PIPED_INSTANCES) {
       try {
-        const data = await PipedProxy.proxyFetch(`${instance}${endpoint}`);
-        console.log(`${MODULE_ID} | Tier 1 (socket proxy) OK via ${instance}`);
+        const healthRes = await fetch(`${LOCAL_PROXY}/health`);
+        if (!healthRes.ok) break;
+      } catch {
+        console.warn(`${MODULE_ID} | Tier 1 (local proxy) not reachable — skipping`);
+        break;
+      }
+      try {
+        const res = await fetch(`${LOCAL_PROXY}/fetch?url=${encodeURIComponent(`${instance}${endpoint}`)}`);
+        if (!res.ok) { console.warn(`${MODULE_ID} | Tier 1 HTTP ${res.status} for ${instance}`); continue; }
+        const data = await res.json();
+        console.log(`${MODULE_ID} | Tier 1 (local proxy) OK via ${instance}`);
         return data;
       } catch (e) {
         console.warn(`${MODULE_ID} | Tier 1 failed for ${instance}: ${e.message}`);

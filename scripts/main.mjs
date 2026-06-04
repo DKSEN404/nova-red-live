@@ -1,7 +1,6 @@
 import { MODULE_ID, SETTINGS } from './constants.mjs';
 import { ChannelManager } from './ChannelManager.mjs';
 import { AudioDirector } from './AudioDirector.mjs';
-import { PipedProxy } from './PipedProxy.mjs';
 
 let channelManager;
 let audioDirector;
@@ -27,7 +26,6 @@ Hooks.once('init', () => {
 });
 
 Hooks.once('ready', async () => {
-  PipedProxy.init();
   channelManager = new ChannelManager();
   await channelManager.init();
 

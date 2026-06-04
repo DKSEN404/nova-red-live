@@ -31,7 +31,8 @@
       "search": "Search",
       "added": "Added: {name}",
       "imported": "Imported {count} tracks from playlist",
-      "notFound": "Could not find anything for that URL/query"
+      "notFound": "Could not find anything for that URL/query",
+      "proxyNotRunning": "YouTube import proxy not detected. Run nr-proxy.bat from the module folder and try again."
     },
     "controls": {
       "play": "Play",
