@@ -10,21 +10,27 @@ export class YouTubeImporter {
   static async fetchFromPiped(endpoint) {
     for (const instance of PIPED_INSTANCES) {
       try {
-        return await PipedProxy.proxyFetch(`${instance}${endpoint}`);
+        const data = await PipedProxy.proxyFetch(`${instance}${endpoint}`);
+        console.log(`${MODULE_ID} | Tier 1 (socket proxy) OK via ${instance}`);
+        return data;
       } catch (e) {
-        continue;
+        console.warn(`${MODULE_ID} | Tier 1 failed for ${instance}: ${e.message}`);
       }
     }
+    console.warn(`${MODULE_ID} | Tier 1 exhausted, trying Tier 2 (direct fetch)`);
     for (const instance of PIPED_INSTANCES) {
       try {
         const url = `${instance}${endpoint}`;
         const res = await fetch(url);
         if (!res.ok) continue;
-        return await res.json();
+        const data = await res.json();
+        console.log(`${MODULE_ID} | Tier 2 (direct) OK via ${instance}`);
+        return data;
       } catch (e) {
-        continue;
+        console.warn(`${MODULE_ID} | Tier 2 failed for ${instance}: ${e.message}`);
       }
     }
+    console.warn(`${MODULE_ID} | Tier 2 exhausted, trying Tier 3 (CORS proxies)`);
     for (const proxy of CORS_PROXIES) {
       for (const instance of PIPED_INSTANCES) {
         try {
@@ -40,12 +46,14 @@ export class YouTubeImporter {
           } else {
             data = await res.json();
           }
+          console.log(`${MODULE_ID} | Tier 3 OK via ${proxy.type} -> ${instance}`);
           return data;
         } catch (e) {
-          continue;
+          console.warn(`${MODULE_ID} | Tier 3 failed for ${proxy.type}/${instance}: ${e.message}`);
         }
       }
     }
+    console.error(`${MODULE_ID} | All 3 tiers exhausted — returning null`);
     return null;
   }
 

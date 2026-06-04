@@ -2,10 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] — 2026-06-03
+
+### Fixed
+- **`scripts/PipedProxy.mjs`**: Socket proxy was not working in Foundry v12.331. Root cause: Foundry v12 uses the **entire event name** as the routing key. When two sub-events were used (`module.nova-red-live.piped-proxy` and `module.nova-red-live.piped-proxy-response`), the server's `game.socket.on()` handlers never fired because the event name routing didn't match. Fixed by switching to a **single event name** (`module.nova-red-live`) with `data.action` field (`'proxy-req'` / `'proxy-res'`) to distinguish request from response — matching the convention used by other Foundry v12 modules (e.g. Preload Tracker uses `module.preload-tracker`). Also added wrapped `game.socket.emit` in try/catch so failures reject the promise immediately. Added comprehensive logging on init, emit, and server-side processing for future debug.
+- **`scripts/AudioDirector.mjs`**: `_handleImport()` notification calls wrapped in try/catch to prevent `mobile-improvements` (v1.3.3) `queuedNotification` hook crash (`Cannot read properties of undefined (reading 'replace')`) from propagating as an unhandled error.
+
+### Changed
+- **`scripts/constants.mjs`**: Added two additional Piped instances (`pipedapi.us.owo.codes` and `pipedapi.namazso.eu`) to improve reliability when multiple instances are down.
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.3] — 2026-06-03
 
 ### Added
-- **`scripts/PipedProxy.mjs`**: New module — server-side socket bridge for Piped API. Uses Foundry's `game.socket` to relay proxy requests from browser clients to the Node.js server, which makes unrestricted HTTP requests (`fetch()`) to Piped instances. Server detected via `typeof window === 'undefined'`. Includes 15s timeout per request, unique request IDs, and concurrent request support via `pending` Map.
+- **`scripts/PipedProxy.mjs`**: New module — server-side socket bridge for Piped API. Uses Foundry's `game.socket` to relay proxy requests from browser clients to the Node.js server, which makes unrestricted HTTP requests (`fetch()`) to Piped instances (no CORS). Server detected via `typeof window === 'undefined'`. Includes 15s timeout per request, unique request IDs, and concurrent request support via `pending` Map.
 - **`scripts/main.mjs`**: Added `PipedProxy.init()` call in `ready` hook, runs before `ChannelManager` initialization to ensure proxy is available for import operations.
 - **`module.json`**: Added `"socket": true` flag to enable Foundry socket API for server-side proxy.
 

@@ -29,7 +29,9 @@ export const PIPED_INSTANCES = [
   'https://pipedapi.leptons.xyz',
   'https://piped-api.lunar.icu',
   'https://pipedapi.adminforge.de',
-  'https://pipedapi.oxy.wiki'
+  'https://pipedapi.oxy.wiki',
+  'https://pipedapi.us.owo.codes',
+  'https://pipedapi.namazso.eu'
 ];
 
 export const SETTINGS = {

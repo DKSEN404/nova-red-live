@@ -150,19 +150,19 @@ export class AudioDirector extends Application {
     if (!val) return;
     const isUrl = /^(https?:\/\/)/i.test(val);
     if (isUrl && !/(youtube\.com|youtu\.be)/i.test(val)) {
-      ui.notifications.warn('Only YouTube URLs or search terms are supported');
+      try { ui.notifications.warn('Only YouTube URLs or search terms are supported'); } catch (e) { console.warn(`${MODULE_ID} |`, e); }
       return;
     }
     const result = await YouTubeImporter.importFromUrl(val);
     if (!result) {
-      ui.notifications.warn(game.i18n.localize('nova-red-live.import.notFound') || 'Could not find anything for that URL/query');
+      try { ui.notifications.warn(game.i18n.localize('nova-red-live.import.notFound') || 'Could not find anything for that URL/query'); } catch (e) { console.warn(`${MODULE_ID} |`, e); }
       return;
     }
 
     if (result.type === 'track') {
       const targetCh = channelId || 'music';
       await this.cm.addTrack(targetCh, result.info);
-      ui.notifications.info(`Added: ${result.info.title}`);
+      try { ui.notifications.info(`Added: ${result.info.title}`); } catch (e) { console.warn(`${MODULE_ID} |`, e); }
       this.render();
     } else if (result.type === 'playlist') {
       const targetCh = channelId || 'music';
@@ -174,7 +174,7 @@ export class AudioDirector extends Application {
           count++;
         }
       }
-      ui.notifications.info(`Imported ${count} tracks from playlist`);
+      try { ui.notifications.info(`Imported ${count} tracks from playlist`); } catch (e) { console.warn(`${MODULE_ID} |`, e); }
       this.render();
     } else if (result.type === 'search') {
       this._searchResults = { query: val, results: result.results, channel: channelId || 'music' };
