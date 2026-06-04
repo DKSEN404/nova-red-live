@@ -8,6 +8,10 @@ Write-Host "[nr-proxy] Press Ctrl+C to stop."
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
 
+Add-Type -AssemblyName System.Net.Http
+$httpClient = New-Object System.Net.Http.HttpClient
+$httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("nr-proxy/2.0")
+
 while ($listener.IsListening) {
   $ctx = $listener.GetContext()
   $req = $ctx.Request
@@ -33,13 +37,12 @@ while ($listener.IsListening) {
     } elseif ($req.RawUrl -match "^/fetch\?url=(.+)") {
       $targetUrl = [Uri]::UnescapeDataString($matches[1])
       Write-Host "[nr-proxy] Fetching $targetUrl"
-      $wc = New-Object Net.WebClient
-      $wc.Headers.Add("User-Agent", "nr-proxy/1.0")
-      $responseBody = $wc.DownloadString($targetUrl)
+      $response = $httpClient.GetAsync($targetUrl).Result
+      $responseBody = $response.Content.ReadAsStringAsync().Result
       $buf = [Text.Encoding]::UTF8.GetBytes($responseBody)
       $res.ContentType = "application/json"
       $res.OutputStream.Write($buf, 0, $buf.Length)
-      $res.StatusCode = 200
+      $res.StatusCode = [int]$response.StatusCode
     } else {
       $body = '{"error":"Not found"}'
       $buf = [Text.Encoding]::UTF8.GetBytes($body)
@@ -61,5 +64,6 @@ while ($listener.IsListening) {
   try { $res.Close() } catch {}
 }
 
+$httpClient.Dispose()
 $listener.Stop()
 Write-Host "[nr-proxy] Stopped."

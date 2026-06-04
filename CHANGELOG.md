@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.7] — 2026-06-03
+
+### Changed
+- **`proxy/nr-proxy.ps1`**: Upgraded HTTP client from `Net.WebClient.DownloadString()` (throws on any non-2xx → all errors become HTTP 500) to `System.Net.Http.HttpClient.GetAsync()` (relays original status code from Piped instances to the module caller). This lets the module see the real HTTP status (e.g. 502 Cloudflare) and skip bad instances faster, without unnecessary retries. User-Agent bumped to `nr-proxy/2.0`.
+
+### Credits
+- Original module: **foundry-tube** by [shrade](https://github.com/shradee)
+
 ## [1.0.6] — 2026-06-03
 
 ### Changed
@@ -206,6 +214,14 @@ All notable changes to this project will be documented in this file.
 # Changelog — Nova-Red Live
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
+
+## [1.0.7] — 2026-06-03
+
+### Cambiado
+- **`proxy/nr-proxy.ps1`**: Actualizado el cliente HTTP de `Net.WebClient.DownloadString()` (lanza excepción en cualquier código no-2xx → todos los errores se convertían en HTTP 500) a `System.Net.Http.HttpClient.GetAsync()` (retransmite el código de estado original de las instancias Piped al módulo). Esto permite que el módulo vea el estado HTTP real (ej. 502 Cloudflare) y salte instancias fallidas más rápido, sin reintentos innecesarios. User-Agent actualizado a `nr-proxy/2.0`.
+
+### Créditos
+- Módulo original: **foundry-tube** por [shrade](https://github.com/shradee)
 
 ## [1.0.6] — 2026-06-03
 
